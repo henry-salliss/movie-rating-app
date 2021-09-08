@@ -1,0 +1,50 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .pop-title{
+      text-align: center;
+  }
+
+  .movie-title{
+      margin: auto;
+      font-size: 0.9em;
+  }
+
+  .movie-poster{
+      width: 60px;
+  }
+
+  .popular-movie{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15%;
+      text-align: center;
+      flex-direction: row;
+      padding: 2%;
+      box-shadow: 6px 5px 5px 5px rgba(0,0,0,0.53);
+  }
+
+  .star{
+      color: yellow;
+  }
+
+
+  /* pagination */
+
+  .pagination{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      padding: 5%;
+  }
+
+  .pagination button{
+      border: none;
+  }
