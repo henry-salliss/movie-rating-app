@@ -903,6 +903,7 @@ var input = document.querySelector("#inputField");
 var searchBtn = document.querySelector("#searchBtn");
 var container = document.querySelector('.container');
 var popularMoviesSection = document.querySelector("#popular");
+var paginationCont = document.querySelector('.pagination');
 var nextPgBtn = document.querySelector('#next');
 var prevPgBtn = document.querySelector('#prev');
 var pageNumber = document.querySelector('#pageNum');
@@ -957,14 +958,15 @@ popularMoviesSection.addEventListener('click', function (e) {
 
   var createHTML = function createHTML(data) {
     // get specific movie data
+    if (!movieContainer) return;
     var dataRes = data.results.find(function (movie) {
       return movie.title === movieContainer.children[0].children[0].textContent;
     });
     console.log(dataRes); // get trailer
 
-    var getTrailer = /*#__PURE__*/function () {
+    var getMoreData = /*#__PURE__*/function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        var request, data, trailer, link, oneMovieHTML;
+        var request, data, trailer, link, requestGenre, genreData, genres, genreHTML, oneMovieHTML;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -980,14 +982,33 @@ popularMoviesSection.addEventListener('click', function (e) {
               case 5:
                 data = _context2.sent;
                 trailer = data.results[0].key;
+                console.log(trailer);
                 link = "https://www.youtube.com/embed/".concat(trailer);
-                console.log(link); // clear the section and insert details of movie
+                _context2.next = 11;
+                return fetch("\n            https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US");
+
+              case 11:
+                requestGenre = _context2.sent;
+                _context2.next = 14;
+                return requestGenre.json();
+
+              case 14:
+                genreData = _context2.sent;
+                genres = [];
+                dataRes.genre_ids.map(function (id) {
+                  genreData.genres.forEach(function (genre) {
+                    if (genre.id === id) genres.push(genre.name);
+                  });
+                });
+                genreHTML = "\n            <p class = 'genre'>".concat(genres, "</p>\n            "); // clear the section and insert details of movie
 
                 popularMoviesSection.innerHTML = '';
-                oneMovieHTML = "\n            <div class = 'popular-movie-closer-look'>\n            <h2>".concat(dataRes.title, "</h2>\n            <img class = 'movie-poster' src = 'https://image.tmdb.org/t/p/w500").concat(dataRes.poster_path, "'>\n            <iframe src=").concat(link, " height=\"200\" width=\"300\" title=\"").concat(dataRes.title, " trailer\"></iframe>\n            <p>").concat(dataRes.overview, "</p>\n            </div>\n            ");
+                paginationCont.style.opacity = 0;
+                oneMovieHTML = "\n\n            <div class='popular-movie-closer-look'>\n            <h2>".concat(dataRes.title, "</h2>\n            <div class=\"mini-details\">\n                ").concat(genreHTML, "\n                <p class=\"rating\">").concat(dataRes.vote_average, "<i class=\"fas fa-star star\"></i></p>\n                <p>Pop rating: ").concat(Math.floor(dataRes.popularity), "</p>\n            </div>\n            <iframe class='trailers' src=").concat(link, " height=\"200\" width=\"300\"\n                allowfullscreen='true' title=\"").concat(dataRes.title, " trailer\"></iframe>\n            <p class=\"overview\">").concat(dataRes.overview, "</p>\n        </div>\n            ");
+                console.log(dataRes.overview);
                 popularMoviesSection.insertAdjacentHTML('afterbegin', oneMovieHTML);
 
-              case 12:
+              case 23:
               case "end":
                 return _context2.stop();
             }
@@ -995,12 +1016,12 @@ popularMoviesSection.addEventListener('click', function (e) {
         }, _callee2);
       }));
 
-      return function getTrailer() {
+      return function getMoreData() {
         return _ref2.apply(this, arguments);
       };
     }();
 
-    getTrailer();
+    getMoreData();
   };
 
   createHTML(currentData);
@@ -1025,24 +1046,10 @@ prevPgBtn.addEventListener('click', function (e) {
 
 var genreAjax = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-    var request, data;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _context3.next = 2;
-            return fetch("\n    https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US");
-
-          case 2:
-            request = _context3.sent;
-            _context3.next = 5;
-            return request.json();
-
-          case 5:
-            data = _context3.sent;
-            console.log(data);
-
-          case 7:
           case "end":
             return _context3.stop();
         }
@@ -1084,7 +1091,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64528" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61146" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

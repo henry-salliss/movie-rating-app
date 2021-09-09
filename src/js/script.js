@@ -7,6 +7,7 @@ const input = document.querySelector("#inputField");
 const searchBtn = document.querySelector("#searchBtn");
 const container = document.querySelector('.container')
 const popularMoviesSection = document.querySelector("#popular");
+const paginationCont = document.querySelector('.pagination');
 const nextPgBtn = document.querySelector('#next');
 const prevPgBtn = document.querySelector('#prev')
 const pageNumber = document.querySelector('#pageNum')
@@ -50,37 +51,57 @@ popularMoviesSection.addEventListener('click', function (e) {
 
     const createHTML = function (data) {
         // get specific movie data
-
+        if (!movieContainer) return;
         const dataRes = data.results.find((movie) => movie.title === movieContainer.children[0].children[0].textContent);
         console.log(dataRes);
 
         // get trailer
-        const getTrailer = async function () {
+        const getMoreData = async function () {
             const request = await fetch(`
             https://api.themoviedb.org/3/movie/${dataRes.id}/videos?api_key=${key}&language=en-US`);
 
             const data = await request.json();
             const trailer = data.results[0].key;
+            console.log(trailer);
             const link = `https://www.youtube.com/embed/${trailer}`
-            console.log(link);
+
+            const requestGenre = await fetch(`
+            https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US`);
+            const genreData = await requestGenre.json();
+            const genres = []
+            dataRes.genre_ids.map(id => {
+                genreData.genres.forEach(genre => {
+                    if (genre.id === id) genres.push(genre.name)
+                })
+            })
+            const genreHTML = `
+            <p class = 'genre'>${genres}</p>
+            `
 
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
+            paginationCont.style.opacity = 0;
             const oneMovieHTML = `
-            <div class = 'popular-movie-closer-look'>
+
+            <div class='popular-movie-closer-look'>
             <h2>${dataRes.title}</h2>
-            <img class = 'movie-poster' src = 'https://image.tmdb.org/t/p/w500${dataRes.poster_path}'>
-            <iframe src=${link} height="200" width="300" title="${dataRes.title} trailer"></iframe>
-            <p>${dataRes.overview}</p>
+            <div class="mini-details">
+                ${genreHTML}
+                <p class="rating">${dataRes.vote_average}<i class="fas fa-star star"></i></p>
+                <p>Pop rating: ${Math.floor(dataRes.popularity)}</p>
             </div>
+            <iframe class='trailers' src=${link} height="200" width="300"
+                allowfullscreen='true' title="${dataRes.title} trailer"></iframe>
+            <p class="overview">${dataRes.overview}</p>
+        </div>
             `
+            console.log(dataRes.overview);
             popularMoviesSection.insertAdjacentHTML('afterbegin', oneMovieHTML)
         };
-        getTrailer();
+        getMoreData();
 
 
     }
-
     createHTML(currentData);
 
 });
@@ -109,11 +130,10 @@ prevPgBtn.addEventListener('click', function (e) {
 
 
 const genreAjax = async function () {
-    const request = await fetch(`
-    https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US`);
-    const data = await request.json();
-    console.log(data);
+
 }
 
 genreAjax();
+
+
 
