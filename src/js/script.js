@@ -1,24 +1,23 @@
 import { async } from 'regenerator-runtime';
 import 'regenerator-runtime/runtime';
-// import { url } from "./config";
-// import { key } from "./config";
+import { key } from "./config";
 
 // get elements
 const input = document.querySelector("#inputField");
 const searchBtn = document.querySelector("#searchBtn");
+const container = document.querySelector('.container')
 const popularMoviesSection = document.querySelector("#popular");
 const nextPgBtn = document.querySelector('#next');
 const prevPgBtn = document.querySelector('#prev')
 const pageNumber = document.querySelector('#pageNum')
 
 let page = 1
+let currentData = {}
 
 const ajax = async function (url, pg) {
 
-    const request = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US&page=${pg}&append_to_response=videos`)
-
+    const request = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${key}&language=en-US&page=${pg}&append_to_response=videos`)
     const data = await request.json();
-
     // create and insert html for popular movies
     data.results.forEach(movie => {
         const html = `
@@ -36,11 +35,56 @@ const ajax = async function (url, pg) {
         // hide prev btn if page 1
         if (page === 1) prevPgBtn.style.opacity = 0;
         page === 1 ? prevPgBtn.style.opacity = 0 : prevPgBtn.style.opacity = 1;
+
+        currentData = data;
     });
 
 
 }
 ajax('_', page);
+
+// show more movie details on click
+popularMoviesSection.addEventListener('click', function (e) {
+    if (e.target.parentElement.classList.contains('container')) return;
+    const movieContainer = e.target.closest('article');
+
+    const createHTML = function (data) {
+        // get specific movie data
+
+        const dataRes = data.results.find((movie) => movie.title === movieContainer.children[0].children[0].textContent);
+        console.log(dataRes);
+
+        // get trailer
+        const getTrailer = async function () {
+            const request = await fetch(`
+            https://api.themoviedb.org/3/movie/${dataRes.id}/videos?api_key=${key}&language=en-US`);
+
+            const data = await request.json();
+            const trailer = data.results[0].key;
+            const link = `https://www.youtube.com/embed/${trailer}`
+            console.log(link);
+
+            // clear the section and insert details of movie
+            popularMoviesSection.innerHTML = '';
+            const oneMovieHTML = `
+            <div class = 'popular-movie-closer-look'>
+            <h2>${dataRes.title}</h2>
+            <img class = 'movie-poster' src = 'https://image.tmdb.org/t/p/w500${dataRes.poster_path}'>
+            <iframe src=${link} height="200" width="300" title="${dataRes.title} trailer"></iframe>
+            <p>${dataRes.overview}</p>
+            </div>
+            `
+            popularMoviesSection.insertAdjacentHTML('afterbegin', oneMovieHTML)
+        };
+        getTrailer();
+
+
+    }
+
+    createHTML(currentData);
+
+});
+
 
 // Make next pagination work
 nextPgBtn.addEventListener('click', function (e) {
@@ -61,10 +105,6 @@ prevPgBtn.addEventListener('click', function (e) {
     ajax('_', pg)
 })
 
-popularMoviesSection.addEventListener('click', function (e) {
-    // console.log(e.target.closest('article'));
-    console.log(e.target.parentElement);
-})
 
 
 
@@ -77,9 +117,3 @@ const genreAjax = async function () {
 
 genreAjax();
 
-const test = async function () {
-    const request = await fetch(`https://api.themoviedb.org/3/movie/297762?api_key=c87d7d62b65ce4618fb6a823d65be34a&append_to_response=videos`)
-    const data = await request.json();
-    console.log(data);
-}
-test();

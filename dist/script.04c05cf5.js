@@ -874,6 +874,17 @@ try {
   }
 }
 
+},{}],"src/js/config.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.url = exports.key = void 0;
+var key = "c87d7d62b65ce4618fb6a823d65be34a";
+exports.key = key;
+var url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=";
+exports.url = url;
 },{}],"src/js/script.js":[function(require,module,exports) {
 "use strict";
 
@@ -881,20 +892,22 @@ var _regeneratorRuntime = require("regenerator-runtime");
 
 require("regenerator-runtime/runtime");
 
+var _config = require("./config");
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-// import { url } from "./config";
-// import { key } from "./config";
 // get elements
 var input = document.querySelector("#inputField");
 var searchBtn = document.querySelector("#searchBtn");
+var container = document.querySelector('.container');
 var popularMoviesSection = document.querySelector("#popular");
 var nextPgBtn = document.querySelector('#next');
 var prevPgBtn = document.querySelector('#prev');
 var pageNumber = document.querySelector('#pageNum');
 var page = 1;
+var currentData = {};
 
 var ajax = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(url, pg) {
@@ -904,7 +917,7 @@ var ajax = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             _context.next = 2;
-            return fetch("https://api.themoviedb.org/3/movie/popular?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US&page=".concat(pg, "&append_to_response=videos"));
+            return fetch("https://api.themoviedb.org/3/movie/popular?api_key=".concat(_config.key, "&language=en-US&page=").concat(pg, "&append_to_response=videos"));
 
           case 2:
             request = _context.sent;
@@ -920,6 +933,7 @@ var ajax = /*#__PURE__*/function () {
 
               if (page === 1) prevPgBtn.style.opacity = 0;
               page === 1 ? prevPgBtn.style.opacity = 0 : prevPgBtn.style.opacity = 1;
+              currentData = data;
             });
 
           case 7:
@@ -935,7 +949,62 @@ var ajax = /*#__PURE__*/function () {
   };
 }();
 
-ajax('_', page); // Make next pagination work
+ajax('_', page); // show more movie details on click
+
+popularMoviesSection.addEventListener('click', function (e) {
+  if (e.target.parentElement.classList.contains('container')) return;
+  var movieContainer = e.target.closest('article');
+
+  var createHTML = function createHTML(data) {
+    // get specific movie data
+    var dataRes = data.results.find(function (movie) {
+      return movie.title === movieContainer.children[0].children[0].textContent;
+    });
+    console.log(dataRes); // get trailer
+
+    var getTrailer = /*#__PURE__*/function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var request, data, trailer, link, oneMovieHTML;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return fetch("\n            https://api.themoviedb.org/3/movie/".concat(dataRes.id, "/videos?api_key=").concat(_config.key, "&language=en-US"));
+
+              case 2:
+                request = _context2.sent;
+                _context2.next = 5;
+                return request.json();
+
+              case 5:
+                data = _context2.sent;
+                trailer = data.results[0].key;
+                link = "https://www.youtube.com/embed/".concat(trailer);
+                console.log(link); // clear the section and insert details of movie
+
+                popularMoviesSection.innerHTML = '';
+                oneMovieHTML = "\n            <div class = 'popular-movie-closer-look'>\n            <h2>".concat(dataRes.title, "</h2>\n            <img class = 'movie-poster' src = 'https://image.tmdb.org/t/p/w500").concat(dataRes.poster_path, "'>\n            <iframe src=").concat(link, " height=\"200\" width=\"300\" title=\"").concat(dataRes.title, " trailer\"></iframe>\n            <p>").concat(dataRes.overview, "</p>\n            </div>\n            ");
+                popularMoviesSection.insertAdjacentHTML('afterbegin', oneMovieHTML);
+
+              case 12:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      return function getTrailer() {
+        return _ref2.apply(this, arguments);
+      };
+    }();
+
+    getTrailer();
+  };
+
+  createHTML(currentData);
+}); // Make next pagination work
 
 nextPgBtn.addEventListener('click', function (e) {
   e.preventDefault();
@@ -953,46 +1022,8 @@ prevPgBtn.addEventListener('click', function (e) {
   popularMoviesSection.innerHTML = '';
   ajax('_', pg);
 });
-popularMoviesSection.addEventListener('click', function (e) {
-  // console.log(e.target.closest('article'));
-  console.log(e.target.parentElement);
-});
 
 var genreAjax = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var request, data;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            _context2.next = 2;
-            return fetch("\n    https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US");
-
-          case 2:
-            request = _context2.sent;
-            _context2.next = 5;
-            return request.json();
-
-          case 5:
-            data = _context2.sent;
-            console.log(data);
-
-          case 7:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-
-  return function genreAjax() {
-    return _ref2.apply(this, arguments);
-  };
-}();
-
-genreAjax();
-
-var test = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
     var request, data;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
@@ -1000,7 +1031,7 @@ var test = /*#__PURE__*/function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             _context3.next = 2;
-            return fetch("https://api.themoviedb.org/3/movie/297762?api_key=c87d7d62b65ce4618fb6a823d65be34a&append_to_response=videos");
+            return fetch("\n    https://api.themoviedb.org/3/genre/movie/list?api_key=c87d7d62b65ce4618fb6a823d65be34a&language=en-US");
 
           case 2:
             request = _context3.sent;
@@ -1019,13 +1050,13 @@ var test = /*#__PURE__*/function () {
     }, _callee3);
   }));
 
-  return function test() {
+  return function genreAjax() {
     return _ref3.apply(this, arguments);
   };
 }();
 
-test();
-},{"regenerator-runtime":"node_modules/regenerator-runtime/runtime.js","regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js"}],"../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+genreAjax();
+},{"regenerator-runtime":"node_modules/regenerator-runtime/runtime.js","regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","./config":"src/js/config.js"}],"../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1053,7 +1084,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57215" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64528" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
