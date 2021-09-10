@@ -7,8 +7,12 @@
     font-family: 'Open Sans', sans-serif;
   }
 
+  button{
+      border: none;
+  }
 
-  .pop-title{
+
+  .title{
       text-align: center;
   }
 
