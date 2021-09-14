@@ -25,7 +25,7 @@
       width: 60px;
   }
 
-  .popular-movie{
+  .movie-tile{
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -68,6 +68,10 @@
       margin-top: 10%;
       text-align: left;
       padding: 2%;
+  }
+
+  .media-type{
+      display: none;
   }
 
   /* pagination */
