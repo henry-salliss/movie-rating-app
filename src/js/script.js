@@ -175,7 +175,6 @@ const tvDetailed = async function (d) {
     const getTrailer = await fetch(`https://api.themoviedb.org/3/tv/${d.id}/videos?api_key=${key}&language=en-US`)
 
     const trailerData = await getTrailer.json();
-    console.log(getTrailer);
     const trailer = trailerData.results[0].key;;
     const link = `https://www.youtube.com/embed/${trailer}`
 
@@ -217,7 +216,6 @@ const renderDetails = function (d, trailer, genres) {
     <section class = 'similar-media'></section>
     `
 
-    console.log(mediaHTML);
     return mediaHTML;
 }
 
@@ -239,7 +237,6 @@ const insertSimilar = function (data) {
         const section = document.querySelector('.similar-media')
         // get first five results
         const firstFive = data.results.slice(0, 5);
-        console.log(section);
         section.insertAdjacentHTML('afterbegin', `<h1>Other stuff you should check out</h1>`)
         firstFive.forEach(similarMedia => {
             const html = `
@@ -263,6 +260,8 @@ const insertSimilar = function (data) {
             // section.remove();
             section.innerHTML = '';
             document.querySelector('.popular-movie-closer-look').remove()
+            const title = e.target.closest('article').children[0].children[0].textContent;
+            searchData(title)
         })
     }, 1000)
 }

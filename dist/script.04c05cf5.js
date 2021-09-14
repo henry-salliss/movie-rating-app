@@ -1159,15 +1159,14 @@ var tvDetailed = /*#__PURE__*/function () {
 
           case 11:
             trailerData = _context4.sent;
-            console.log(getTrailer);
             trailer = trailerData.results[0].key;
             ;
             link = "https://www.youtube.com/embed/".concat(trailer); // get genres
 
-            _context4.next = 18;
+            _context4.next = 17;
             return getGenre(d);
 
-          case 18:
+          case 17:
             genres = _context4.sent;
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
@@ -1175,15 +1174,15 @@ var tvDetailed = /*#__PURE__*/function () {
             paginationCont.style.opacity = 0;
             html = renderDetails(d, link, genres); // get similar shows
 
-            _context4.next = 25;
+            _context4.next = 24;
             return getSimilar(d);
 
-          case 25:
+          case 24:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 28:
+          case 27:
           case "end":
             return _context4.stop();
         }
@@ -1199,7 +1198,6 @@ var tvDetailed = /*#__PURE__*/function () {
 
 var renderDetails = function renderDetails(d, trailer, genres) {
   var mediaHTML = "\n    <button ><i class=\"fas fa-arrow-left\" id=\"backBtn\"></i></button>\n    <div class='popular-movie-closer-look'>\n    <h2>".concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    <iframe class='trailers' src=").concat(trailer, " height=\"200\" width=\"300\"\n        allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>\n    <p class=\"overview\">").concat(d.overview, "</p>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
-  console.log(mediaHTML);
   return mediaHTML;
 }; // get similar media data
 
@@ -1244,7 +1242,6 @@ var insertSimilar = function insertSimilar(data) {
     var section = document.querySelector('.similar-media'); // get first five results
 
     var firstFive = data.results.slice(0, 5);
-    console.log(section);
     section.insertAdjacentHTML('afterbegin', "<h1>Other stuff you should check out</h1>");
     firstFive.forEach(function (similarMedia) {
       var html = "\n                <article class='movie-tile'>\n                <div class = 'details'>\n                <h2 class ='movie-title'>".concat(similarMedia.title, "</h2>\n                <p>").concat(similarMedia.release_date, "</p>\n                <p><i class=\"fas fa-star star\"></i> ").concat(Math.floor(similarMedia.vote_average), "/10</p>\n                </div>\n                <img class='movie-poster' src='https://image.tmdb.org/t/p/w500").concat(similarMedia.poster_path, "'>\n                </article>\n            ");
@@ -1257,6 +1254,8 @@ var insertSimilar = function insertSimilar(data) {
 
       section.innerHTML = '';
       document.querySelector('.popular-movie-closer-look').remove();
+      var title = e.target.closest('article').children[0].children[0].textContent;
+      searchData(title);
     });
   }, 1000);
 }; // get genre of media
