@@ -880,18 +880,11 @@ try {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.renderDetails = exports.url = exports.key = void 0;
+exports.url = exports.key = void 0;
 var key = "c87d7d62b65ce4618fb6a823d65be34a";
 exports.key = key;
 var url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=";
 exports.url = url;
-
-var renderDetails = function renderDetails(d, trailer, genres) {
-  var mediaHTML = "\n    <button ><i class=\"fas fa-arrow-left\" id=\"backBtn\"></i></button>\n    <div class='popular-movie-closer-look'>\n    <h2>".concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    <iframe class='trailers' src=").concat(trailer, " height=\"200\" width=\"300\"\n        allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>\n    <p class=\"overview\">").concat(d.overview, "</p>\n</div>\n    ");
-  return mediaHTML;
-};
-
-exports.renderDetails = renderDetails;
 },{}],"src/js/script.js":[function(require,module,exports) {
 "use strict";
 
@@ -1044,20 +1037,21 @@ popularMoviesSection.addEventListener('click', function (e) {
   createHTML(currentData);
 }); // make back button work
 
-popularMoviesSection.addEventListener('click', function (e) {
+container.addEventListener('click', function (e) {
   e.preventDefault();
   var backBtn = document.querySelector('#backBtn');
 
   if (e.target === backBtn) {
     // clear details and similar media section
-    // document.querySelector('.popular-movie-closer-look').remove()
-    document.querySelector('.popular-movie-closer-look').innerHTML = ''; // document.querySelector('.similar-media').remove();
-
+    document.querySelector('.popular-movie-closer-look').innerHTML = '';
     document.querySelector('.similar-media').innerHTML = '';
-    backBtn.remove(); // restore original state
+    backBtn.remove(); // container.innerHTML = '';
+    // restore original state
 
     title.style.opacity = 1;
-    paginationCont.style.opacity = 1;
+    paginationCont.style.opacity = 1; // paginationCont.style.height = '100%'
+
+    paginationCont.style.display = 'flex';
     ajax('_', page);
   }
 }); // Make next pagination work
@@ -1107,19 +1101,21 @@ var movieDetailed = /*#__PURE__*/function () {
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
             title.style.opacity = 0;
-            paginationCont.style.opacity = 0; // render the detailed html
+            paginationCont.style.opacity = 0; // paginationCont.style.height = 0;
+
+            paginationCont.style.display = 'none'; // render the detailed html
 
             html = renderDetails(d, link, genres); // get similar shows
 
-            _context3.next = 17;
+            _context3.next = 18;
             return getSimilar(d);
 
-          case 17:
+          case 18:
             similar = _context3.sent;
             insertSimilar(similar);
             return _context3.abrupt("return", html);
 
-          case 20:
+          case 21:
           case "end":
             return _context3.stop();
         }
@@ -1171,18 +1167,20 @@ var tvDetailed = /*#__PURE__*/function () {
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
             title.style.opacity = 0;
-            paginationCont.style.opacity = 0;
+            paginationCont.style.opacity = 0; // paginationCont.style.height = 0;
+
+            paginationCont.style.display = 'none';
             html = renderDetails(d, link, genres); // get similar shows
 
-            _context4.next = 24;
+            _context4.next = 25;
             return getSimilar(d);
 
-          case 24:
+          case 25:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 27:
+          case 28:
           case "end":
             return _context4.stop();
         }
@@ -1197,7 +1195,7 @@ var tvDetailed = /*#__PURE__*/function () {
 
 
 var renderDetails = function renderDetails(d, trailer, genres) {
-  var mediaHTML = "\n    <button ><i class=\"fas fa-arrow-left\" id=\"backBtn\"></i></button>\n    <div class='popular-movie-closer-look'>\n    <h2>".concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    <iframe class='trailers' src=").concat(trailer, " height=\"200\" width=\"300\"\n        allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>\n    <p class=\"overview\">").concat(d.overview, "</p>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
+  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='popular-movie-closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    <iframe class='trailers' src=").concat(trailer, " height=\"200\" width=\"300\"\n        allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>\n    <p class=\"overview\">").concat(d.overview, "</p>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
   return mediaHTML;
 }; // get similar media data
 
@@ -1242,18 +1240,20 @@ var insertSimilar = function insertSimilar(data) {
     var section = document.querySelector('.similar-media'); // get first five results
 
     var firstFive = data.results.slice(0, 5);
-    section.insertAdjacentHTML('afterbegin', "<h1>Other stuff you should check out</h1>");
+    section.insertAdjacentHTML('beforeend', "<h1>Other stuff you should check out</h1>");
     firstFive.forEach(function (similarMedia) {
       var html = "\n                <article class='movie-tile'>\n                <div class = 'details'>\n                <h2 class ='movie-title'>".concat(similarMedia.title, "</h2>\n                <p>").concat(similarMedia.release_date, "</p>\n                <p><i class=\"fas fa-star star\"></i> ").concat(Math.floor(similarMedia.vote_average), "/10</p>\n                </div>\n                <img class='movie-poster' src='https://image.tmdb.org/t/p/w500").concat(similarMedia.poster_path, "'>\n                </article>\n            ");
       section.insertAdjacentHTML('beforeend', html);
     }); // get more details of similar media
 
-    section.addEventListener('click', function (e) {
+    container.addEventListener('click', function (e) {
       if (e.target.classList.contains('similar-media')) return; // hide section
-      // section.remove();
 
-      section.innerHTML = '';
-      document.querySelector('.popular-movie-closer-look').remove();
+      section.innerHTML = ''; // if (typeof closeLook === 'undefined' || typeof title === 'undefined') return;
+
+      if (typeof section === 'undefined') return;
+      var closeLook = document.querySelector('.popular-movie-closer-look');
+      closeLook.remove();
       var title = e.target.closest('article').children[0].children[0].textContent;
       searchData(title);
     });
@@ -1318,33 +1318,36 @@ var searchData = /*#__PURE__*/function () {
 
           case 5:
             data = _context7.sent;
+            console.log(data.results[0]);
 
             if (!(data.results[0].media_type === 'tv')) {
-              _context7.next = 11;
+              _context7.next = 12;
               break;
             }
 
-            _context7.next = 9;
+            _context7.next = 10;
             return tvDetailed(data.results[0]);
 
-          case 9:
+          case 10:
             html = _context7.sent;
-            container.insertAdjacentHTML('beforeend', html);
+            container.insertAdjacentHTML('afterbegin', html);
 
-          case 11:
+          case 12:
             if (!(data.results[0].media_type === 'movie')) {
-              _context7.next = 16;
+              _context7.next = 18;
               break;
             }
 
-            _context7.next = 14;
+            popularMoviesSection.innerHTML = '';
+            _context7.next = 16;
             return movieDetailed(data.results[0]);
 
-          case 14:
-            _html2 = _context7.sent;
-            container.insertAdjacentHTML('beforeend', _html2);
-
           case 16:
+            _html2 = _context7.sent;
+            // container.insertAdjacentHTML('afterbegin', html)
+            popularMoviesSection.innerHTML = _html2;
+
+          case 18:
           case "end":
             return _context7.stop();
         }

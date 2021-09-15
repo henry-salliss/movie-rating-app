@@ -96,20 +96,21 @@ popularMoviesSection.addEventListener('click', function (e) {
 
 
 // make back button work
-popularMoviesSection.addEventListener('click', function (e) {
+container.addEventListener('click', function (e) {
     e.preventDefault();
     const backBtn = document.querySelector('#backBtn')
     if (e.target === backBtn) {
         // clear details and similar media section
-        // document.querySelector('.popular-movie-closer-look').remove()
         document.querySelector('.popular-movie-closer-look').innerHTML = '';
-        // document.querySelector('.similar-media').remove();
         document.querySelector('.similar-media').innerHTML = '';
         backBtn.remove();
+        // container.innerHTML = '';
 
         // restore original state
         title.style.opacity = 1;
         paginationCont.style.opacity = 1;
+        // paginationCont.style.height = '100%'
+        paginationCont.style.display = 'flex'
         ajax('_', page)
     }
 })
@@ -153,6 +154,8 @@ const movieDetailed = async function (d) {
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
     paginationCont.style.opacity = 0;
+    // paginationCont.style.height = 0;
+    paginationCont.style.display = 'none'
 
     // render the detailed html
     const html = renderDetails(d, link, genres)
@@ -187,6 +190,8 @@ const tvDetailed = async function (d) {
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
     paginationCont.style.opacity = 0;
+    // paginationCont.style.height = 0;
+    paginationCont.style.display = 'none'
 
     const html = renderDetails(d, link, genres)
 
@@ -201,7 +206,8 @@ const tvDetailed = async function (d) {
 
 const renderDetails = function (d, trailer, genres) {
     const mediaHTML = `
-    <button ><i class="fas fa-arrow-left" id="backBtn"></i></button>
+    ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
+    
     <div class='popular-movie-closer-look'>
     <h2>${d.title || d.name}</h2>
     <div class="mini-details">
@@ -237,7 +243,7 @@ const insertSimilar = function (data) {
         const section = document.querySelector('.similar-media')
         // get first five results
         const firstFive = data.results.slice(0, 5);
-        section.insertAdjacentHTML('afterbegin', `<h1>Other stuff you should check out</h1>`)
+        section.insertAdjacentHTML('beforeend', `<h1>Other stuff you should check out</h1>`)
         firstFive.forEach(similarMedia => {
             const html = `
                 <article class='movie-tile'>
@@ -254,12 +260,15 @@ const insertSimilar = function (data) {
 
         })
         // get more details of similar media
-        section.addEventListener('click', function (e) {
+        container.addEventListener('click', function (e) {
             if (e.target.classList.contains('similar-media')) return;
             // hide section
-            // section.remove();
             section.innerHTML = '';
-            document.querySelector('.popular-movie-closer-look').remove()
+
+            // if (typeof closeLook === 'undefined' || typeof title === 'undefined') return;
+            if (typeof section === 'undefined') return;
+            const closeLook = document.querySelector('.popular-movie-closer-look');
+            closeLook.remove()
             const title = e.target.closest('article').children[0].children[0].textContent;
             searchData(title)
         })
@@ -289,14 +298,17 @@ const searchData = async function (query) {
     const request = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&language=en-US&query=${query}&page=1&include_adult=false`);
 
     const data = await request.json();
+    console.log(data.results[0]);
 
     if (data.results[0].media_type === 'tv') {
         const html = await tvDetailed(data.results[0]);
-        container.insertAdjacentHTML('beforeend', html)
+        container.insertAdjacentHTML('afterbegin', html)
     }
     if (data.results[0].media_type === 'movie') {
+        popularMoviesSection.innerHTML = '';
         const html = await movieDetailed(data.results[0]);
-        container.insertAdjacentHTML('beforeend', html)
+        // container.insertAdjacentHTML('afterbegin', html)
+        popularMoviesSection.innerHTML = html;
     }
 };
 
