@@ -880,11 +880,19 @@ try {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.url = exports.key = void 0;
+exports.renderError = exports.url = exports.key = void 0;
 var key = "c87d7d62b65ce4618fb6a823d65be34a";
 exports.key = key;
 var url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=";
 exports.url = url;
+
+var renderError = function renderError(msg, cont) {
+  var html = "\n    <div class=\"error-container\">\n    <p class = 'errMessage'>\n    <i class=\"fas fa-exclamation-circle\"></i>\n    <i class=\"fas fa-times delErr\"></i>     \n    </p>\n    \n    <p class=\"err-message\">".concat(msg, "</p>\n    </div>\n    ");
+  cont.classList.add('overlay');
+  cont.insertAdjacentHTML('beforebegin', html);
+};
+
+exports.renderError = renderError;
 },{}],"src/js/script.js":[function(require,module,exports) {
 "use strict";
 
@@ -1049,8 +1057,7 @@ container.addEventListener('click', function (e) {
     // restore original state
 
     title.style.opacity = 1;
-    paginationCont.style.opacity = 1; // paginationCont.style.height = '100%'
-
+    paginationCont.style.opacity = 1;
     paginationCont.style.display = 'flex';
     ajax('_', page);
   }
@@ -1308,51 +1315,62 @@ var searchData = /*#__PURE__*/function () {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _context7.next = 2;
+            _context7.prev = 0;
+            _context7.next = 3;
             return fetch("https://api.themoviedb.org/3/search/multi?api_key=".concat(_config.key, "&language=en-US&query=").concat(query, "&page=1&include_adult=false"));
 
-          case 2:
+          case 3:
             request = _context7.sent;
-            _context7.next = 5;
+            _context7.next = 6;
             return request.json();
 
-          case 5:
+          case 6:
             data = _context7.sent;
             console.log(data.results[0]);
 
             if (!(data.results[0].media_type === 'tv')) {
-              _context7.next = 12;
+              _context7.next = 13;
               break;
             }
 
-            _context7.next = 10;
+            _context7.next = 11;
             return tvDetailed(data.results[0]);
 
-          case 10:
+          case 11:
             html = _context7.sent;
             container.insertAdjacentHTML('afterbegin', html);
 
-          case 12:
+          case 13:
             if (!(data.results[0].media_type === 'movie')) {
-              _context7.next = 18;
+              _context7.next = 19;
               break;
             }
 
             popularMoviesSection.innerHTML = '';
-            _context7.next = 16;
+            _context7.next = 17;
             return movieDetailed(data.results[0]);
 
-          case 16:
+          case 17:
             _html2 = _context7.sent;
             // container.insertAdjacentHTML('afterbegin', html)
             popularMoviesSection.innerHTML = _html2;
 
-          case 18:
+          case 19:
+            _context7.next = 25;
+            break;
+
+          case 21:
+            _context7.prev = 21;
+            _context7.t0 = _context7["catch"](0);
+            console.log('invalid search');
+            (0, _config.renderError)('We could not find something matching your search please try again', container);
+
+          case 25:
           case "end":
             return _context7.stop();
         }
       }
-    }, _callee7);
+    }, _callee7, null, [[0, 21]]);
   }));
 
   return function searchData(_x8) {
@@ -1369,7 +1387,20 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
     if (input.value === '') return;
     searchData(input.value);
+    input.value = '';
   }
+});
+document.addEventListener('click', function (e) {
+  if (!e.target.classList.contains('delErr')) return; // restore original state
+
+  title.style.opacity = 1;
+  paginationCont.style.opacity = 1;
+  paginationCont.style.display = 'flex';
+  ajax('_', page);
+  container.classList.remove('overlay'); // remove error
+
+  var errContainer = document.querySelector('.error-container');
+  errContainer.remove();
 });
 },{"regenerator-runtime":"node_modules/regenerator-runtime/runtime.js","regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","./config":"src/js/config.js"}],"../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -1399,7 +1430,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51868" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50788" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

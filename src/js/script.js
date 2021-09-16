@@ -1,6 +1,7 @@
 import { async } from 'regenerator-runtime';
 import 'regenerator-runtime/runtime';
 import { key } from "./config";
+import { renderError } from './config';
 
 // get elements
 const container = document.querySelector('.container')
@@ -109,7 +110,6 @@ container.addEventListener('click', function (e) {
         // restore original state
         title.style.opacity = 1;
         paginationCont.style.opacity = 1;
-        // paginationCont.style.height = '100%'
         paginationCont.style.display = 'flex'
         ajax('_', page)
     }
@@ -295,20 +295,25 @@ const getGenre = async function (data) {
 
 // Make search bar work
 const searchData = async function (query) {
-    const request = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&language=en-US&query=${query}&page=1&include_adult=false`);
+    try {
+        const request = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&language=en-US&query=${query}&page=1&include_adult=false`);
 
-    const data = await request.json();
-    console.log(data.results[0]);
+        const data = await request.json();
+        console.log(data.results[0]);
 
-    if (data.results[0].media_type === 'tv') {
-        const html = await tvDetailed(data.results[0]);
-        container.insertAdjacentHTML('afterbegin', html)
-    }
-    if (data.results[0].media_type === 'movie') {
-        popularMoviesSection.innerHTML = '';
-        const html = await movieDetailed(data.results[0]);
-        // container.insertAdjacentHTML('afterbegin', html)
-        popularMoviesSection.innerHTML = html;
+        if (data.results[0].media_type === 'tv') {
+            const html = await tvDetailed(data.results[0]);
+            container.insertAdjacentHTML('afterbegin', html)
+        }
+        if (data.results[0].media_type === 'movie') {
+            popularMoviesSection.innerHTML = '';
+            const html = await movieDetailed(data.results[0]);
+            // container.insertAdjacentHTML('afterbegin', html)
+            popularMoviesSection.innerHTML = html;
+        }
+    } catch (err) {
+        console.log('invalid search');
+        renderError('We could not find something matching your search please try again', container)
     }
 };
 
@@ -322,5 +327,20 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') {
         if (input.value === '') return;
         searchData(input.value);
+        input.value = '';
     }
+})
+
+document.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('delErr')) return;
+    // restore original state
+    title.style.opacity = 1;
+    paginationCont.style.opacity = 1;
+    paginationCont.style.display = 'flex'
+    ajax('_', page)
+    container.classList.remove('overlay')
+
+    // remove error
+    const errContainer = document.querySelector('.error-container');
+    errContainer.remove();
 })
