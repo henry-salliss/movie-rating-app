@@ -102,9 +102,10 @@ container.addEventListener('click', function (e) {
     const backBtn = document.querySelector('#backBtn')
     if (e.target === backBtn) {
         // clear details and similar media section
-        document.querySelector('.popular-movie-closer-look').innerHTML = '';
-        document.querySelector('.similar-media').innerHTML = '';
         backBtn.remove();
+        document.querySelector('.closer-look').innerHTML = '';
+        // document.querySelector('.known-for').innerHTML = ''
+        console.log('hello');
         // container.innerHTML = '';
 
         // restore original state
@@ -112,6 +113,7 @@ container.addEventListener('click', function (e) {
         paginationCont.style.opacity = 1;
         paginationCont.style.display = 'flex'
         ajax('_', page)
+        document.querySelector('.similar-media').innerHTML = '';
     }
 })
 
@@ -190,7 +192,6 @@ const tvDetailed = async function (d) {
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
     paginationCont.style.opacity = 0;
-    // paginationCont.style.height = 0;
     paginationCont.style.display = 'none'
 
     const html = renderDetails(d, link, genres)
@@ -199,6 +200,63 @@ const tvDetailed = async function (d) {
     const similar = await getSimilar(d);
     insertSimilar(similar)
     return html;
+};
+
+const personDetailed = async function (data) {
+    const html = `
+    ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
+    <div class = 'closer-look'>
+    <h2>${data.name}</h2>
+    <div class="mini-details">
+    <p class = 'gender'>${data.gender === 1 ? 'Female' : 'Male'}</p>
+        <p class="rating">${data.known_for_department} 🎬</p>
+        <p>Pop rating: ${Math.floor(data.popularity)}<i class="fas fa-star star"></i></p>
+    </div>
+    <div class = 'personImg'>
+    <img class ='person-poster'src = 'https://image.tmdb.org/t/p/w500${data.profile_path}'>
+    </div>
+    </div>
+
+    <section class = 'known-for'>
+    <h1>Known for...</h1
+    </section>
+    `
+
+    setTimeout(() => {
+        const knownForMovies = document.querySelector('.known-for');
+        data.known_for.forEach(movie => {
+            const knownForHTML = `
+            <article class='movie-tile'>
+            <div class = 'details'>
+            <h2 class ='movie-title'>${movie.title}</h2>
+            <p>${movie.release_date}</p>
+            <p><i class="fas fa-star star"></i> ${Math.floor(movie.vote_average)}/10</p>
+            </div>
+            <img class='movie-poster' src='https://image.tmdb.org/t/p/w500${movie.poster_path}'>
+            </article>
+            `
+            knownForMovies.insertAdjacentHTML('beforeend', knownForHTML);
+        })
+
+        container.addEventListener('click', function (e) {
+            if (e.target.classList.contains('known-for')) return;
+            if (typeof knownForMovies === 'undefined') return;
+            knownForMovies.innerHTML = '';
+            const closeLook = document.querySelector('.closer-look');
+            if (typeof closeLook != 'null') {
+                closeLook.remove()
+                const title = e.target.closest('article').children[0].children[0].textContent;
+                searchData(title)
+            }
+        })
+    }, 1000)
+    // clear the section and insert details of movie
+    popularMoviesSection.innerHTML = '';
+    title.style.opacity = 0;
+    paginationCont.style.opacity = 0;
+    paginationCont.style.display = 'none'
+
+    return html
 }
 
 
@@ -208,7 +266,7 @@ const renderDetails = function (d, trailer, genres) {
     const mediaHTML = `
     ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
     
-    <div class='popular-movie-closer-look'>
+    <div class='closer-look'>
     <h2>${d.title || d.name}</h2>
     <div class="mini-details">
     <p class = 'genre'>${genres}</p>
@@ -243,7 +301,7 @@ const insertSimilar = function (data) {
         const section = document.querySelector('.similar-media')
         // get first five results
         const firstFive = data.results.slice(0, 5);
-        section.insertAdjacentHTML('beforeend', `<h1>Other stuff you should check out</h1>`)
+        section.insertAdjacentHTML('beforeend', `<h1 class='mini-heading'>Other stuff you should check out</h1>`)
         firstFive.forEach(similarMedia => {
             const html = `
                 <article class='movie-tile'>
@@ -265,12 +323,13 @@ const insertSimilar = function (data) {
             // hide section
             section.innerHTML = '';
 
-            // if (typeof closeLook === 'undefined' || typeof title === 'undefined') return;
             if (typeof section === 'undefined') return;
-            const closeLook = document.querySelector('.popular-movie-closer-look');
-            closeLook.remove()
-            const title = e.target.closest('article').children[0].children[0].textContent;
-            searchData(title)
+            const closeLook = document.querySelector('.closer-look');
+            if (typeof closeLook !== 'null') {
+                closeLook.remove()
+                const title = e.target.closest('article').children[0].children[0].textContent;
+                searchData(title)
+            }
         })
     }, 1000)
 }
@@ -299,23 +358,30 @@ const searchData = async function (query) {
         const request = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&language=en-US&query=${query}&page=1&include_adult=false`);
 
         const data = await request.json();
-        console.log(data.results[0]);
-
+        // show details for tv search
         if (data.results[0].media_type === 'tv') {
             const html = await tvDetailed(data.results[0]);
             container.insertAdjacentHTML('afterbegin', html)
         }
+        // show details for movie search
         if (data.results[0].media_type === 'movie') {
             popularMoviesSection.innerHTML = '';
             const html = await movieDetailed(data.results[0]);
             // container.insertAdjacentHTML('afterbegin', html)
             popularMoviesSection.innerHTML = html;
         }
+        // show details for person search
+        if (data.results[0].media_type === 'person') {
+            popularMoviesSection.innerHTML = '';
+            const html = await personDetailed(data.results[0]);
+            popularMoviesSection.innerHTML = html;
+        }
     } catch (err) {
-        console.log('invalid search');
         renderError('We could not find something matching your search please try again', container)
     }
 };
+
+// make search button and enter key search for media
 
 searchBtn.addEventListener('click', function (e) {
     e.preventDefault();
@@ -330,6 +396,8 @@ document.addEventListener('keydown', function (e) {
         input.value = '';
     }
 })
+
+// make x btn on error container work
 
 document.addEventListener('click', function (e) {
     if (!e.target.classList.contains('delErr')) return;

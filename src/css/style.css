@@ -37,7 +37,7 @@
   }
 
 
-  .title{
+  h1{
       color: #fff;
       text-align: center;
       width: fit-content;
@@ -110,7 +110,7 @@
 
   /* closer look at pop movie */
 
-  .popular-movie-closer-look{
+  .closer-look{
       display: flex;
       text-align: center;
       margin: 5%;
@@ -118,7 +118,17 @@
       box-shadow: 6px 5px 5px 5px rgba(0,0,0,0.53);
   }
 
-  .popular-movie-closer-look p {
+  .personImg{
+      display: flex;
+  }
+
+  .person-poster{
+      transform: scale(0.5);
+      margin-top: -25%;
+      margin-bottom: -25%;
+  }
+
+  .closer-look p {
       font-size: 0.8em;
   }
 
@@ -142,6 +152,7 @@
   .media-type{
       display: none;
   }
+
 
   /* pagination */
 
