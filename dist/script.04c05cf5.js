@@ -1058,6 +1058,7 @@ container.addEventListener('click', function (e) {
     // restore original state
 
     title.style.opacity = 1;
+    title.style.display = 'flex';
     paginationCont.style.opacity = 1;
     paginationCont.style.display = 'flex';
     ajax('_', page);
@@ -1110,21 +1111,22 @@ var movieDetailed = /*#__PURE__*/function () {
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
             title.style.opacity = 0;
+            title.style.display = 'none';
             paginationCont.style.opacity = 0; // paginationCont.style.height = 0;
 
             paginationCont.style.display = 'none'; // render the detailed html
 
             html = renderDetails(d, link, genres); // get similar shows
 
-            _context3.next = 18;
+            _context3.next = 19;
             return getSimilar(d);
 
-          case 18:
+          case 19:
             similar = _context3.sent;
             insertSimilar(similar);
             return _context3.abrupt("return", html);
 
-          case 21:
+          case 22:
           case "end":
             return _context3.stop();
         }
@@ -1176,19 +1178,20 @@ var tvDetailed = /*#__PURE__*/function () {
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
             title.style.opacity = 0;
+            title.style.display = 'none';
             paginationCont.style.opacity = 0;
             paginationCont.style.display = 'none';
             html = renderDetails(d, link, genres); // get similar shows
 
-            _context4.next = 25;
+            _context4.next = 26;
             return getSimilar(d);
 
-          case 25:
+          case 26:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 28:
+          case 29:
           case "end":
             return _context4.stop();
         }
@@ -1231,11 +1234,12 @@ var personDetailed = /*#__PURE__*/function () {
 
             popularMoviesSection.innerHTML = '';
             title.style.opacity = 0;
+            title.style.display = 'none';
             paginationCont.style.opacity = 0;
             paginationCont.style.display = 'none';
             return _context5.abrupt("return", html);
 
-          case 7:
+          case 8:
           case "end":
             return _context5.stop();
         }
@@ -1458,6 +1462,7 @@ document.addEventListener('click', function (e) {
   if (!e.target.classList.contains('delErr')) return; // restore original state
 
   title.style.opacity = 1;
+  title.style.display = 'flex';
   paginationCont.style.opacity = 1;
   paginationCont.style.display = 'flex';
   ajax('_', page);

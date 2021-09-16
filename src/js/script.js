@@ -110,6 +110,7 @@ container.addEventListener('click', function (e) {
 
         // restore original state
         title.style.opacity = 1;
+        title.style.display = 'flex'
         paginationCont.style.opacity = 1;
         paginationCont.style.display = 'flex'
         ajax('_', page)
@@ -155,6 +156,7 @@ const movieDetailed = async function (d) {
     // clear the section and insert details of movie
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
+    title.style.display = 'none'
     paginationCont.style.opacity = 0;
     // paginationCont.style.height = 0;
     paginationCont.style.display = 'none'
@@ -191,6 +193,7 @@ const tvDetailed = async function (d) {
     // clear the section and insert details of movie
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
+    title.style.display = 'none'
     paginationCont.style.opacity = 0;
     paginationCont.style.display = 'none'
 
@@ -253,6 +256,7 @@ const personDetailed = async function (data) {
     // clear the section and insert details of movie
     popularMoviesSection.innerHTML = '';
     title.style.opacity = 0;
+    title.style.display = 'none'
     paginationCont.style.opacity = 0;
     paginationCont.style.display = 'none'
 
@@ -403,6 +407,7 @@ document.addEventListener('click', function (e) {
     if (!e.target.classList.contains('delErr')) return;
     // restore original state
     title.style.opacity = 1;
+    title.style.display = 'flex';
     paginationCont.style.opacity = 1;
     paginationCont.style.display = 'flex'
     ajax('_', page)
