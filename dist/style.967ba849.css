@@ -31,6 +31,22 @@
   }
 
 
+  /* animation */
+
+  @keyframes slide-up-fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10%);
+    }
+    50% {
+      opacity: 1;
+    }
+  
+    100% {
+      opacity: 0;
+      transform: translateY(-10%);
+    }
+  }
 
 
   /* search section styles */
@@ -75,16 +91,46 @@
       background-color: #dde748;
   }
 
+  .watchlist-button{
+      text-align: center;
+  }
+
+  .watchlist-button p{
+    font-size: 0.7em;
+  }
   #watchlistBtn{
       color: white;
       background-color: black;
       font-size: 1.5em;
   }
 
+
   .title{
       font-size: 1.5em;
   }
 
+
+  /* watchlist styles */
+
+  .watchlist-items{
+      background-color: black;
+      color: white;
+      text-align: left;
+      justify-content: right;
+      width: fit-content;
+      transition: 2000ms;
+      padding: 3%;
+      display: none;
+      position: absolute;
+  }
+
+  .item{
+      margin: 3% 0 3% 0;
+  }
+
+  .reveal{
+      display: flex;
+  }
   
   /* closer look styles */
 
@@ -145,6 +191,24 @@
     .in-watchlist{
         background-color: red;
     }
+
+
+    .favourite-message {
+        animation: slide-up-fade-in ease 1s forwards;
+        border-radius: 25px;
+        color: #fff;
+        background-color: black;
+        display: flex;
+        margin: auto;
+        margin-top: 10%;
+        padding: 5%;
+        transition: 100ms;
+        width: fit-content;
+        position: absolute;
+        top: 50%;
+        left: 28%;
+        z-index: 99;
+      }
 
 
  /* movie tile styles */

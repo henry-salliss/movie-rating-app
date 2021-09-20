@@ -13,7 +13,8 @@ const paginationCont = document.querySelector('.pagination');
 const nextPgBtn = document.querySelector('#next');
 const prevPgBtn = document.querySelector('#prev')
 const pageNumber = document.querySelector('#pageNum')
-
+const watchlistBtn = document.querySelector('#watchlistBtn')
+const watchlistSection = document.querySelector('.watchlist-items')
 
 let page = 1
 let currentData = {}
@@ -166,6 +167,9 @@ container.addEventListener('click', function (e) {
 
         // change text on btn
         if (e.target.classList.contains('in-watchlist')) e.target.textContent = 'Remove from watchlist';
+
+        // show message
+        watchlistMessage('Added to watchlist', watchlistBtn);
     } else if (e.target.classList.contains('in-watchlist')) {
         e.target.classList.remove('in-watchlist')
         e.target.textContent = 'Save to watchlist'
@@ -183,9 +187,53 @@ container.addEventListener('click', function (e) {
         // update local storage
         localStorage.setItem("watchlist", JSON.stringify(local));
 
+
+        // show message
+        watchlistMessage('Removed from watchlist', watchlistBtn);
     }
 })
 
+// show message on watchlist save/remove
+
+const watchlistMessage = function (msg, location) {
+    const html = `
+      <div class="favourite-message">
+      <p class="fav-msg">${msg} <i class="fas fa-film"></i></p>
+      </div>
+      `;
+
+    location.insertAdjacentHTML("beforebegin", html);
+    setTimeout(() => {
+        document.querySelector(".favourite-message").remove();
+    }, 750);
+};
+
+// show watchlist on click
+watchlistBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!watchlistSection.classList.contains('reveal')) {
+        console.log('hello');
+        watchlistSection.classList.add('reveal');
+        // show box section of all names of saved shows
+        const watchlistItems = JSON.parse(localStorage.getItem("watchlist"));
+        watchlistItems.forEach(item => {
+            const html = `<p class="item">${item}</p>`
+            watchlistSection.insertAdjacentHTML('afterbegin', html);
+        })
+
+    } else if (watchlistSection.classList.contains('reveal')) {
+        watchlistSection.classList.remove('reveal')
+        watchlistSection.innerHTML = '';
+    }
+})
+
+watchlistSection.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('item')) return;
+
+    searchData(e.target.textContent)
+    watchlistSection.classList.remove('reveal')
+    watchlistSection.innerHTML = '';
+})
 
 
 
@@ -342,14 +390,13 @@ const renderDetails = function (d, trailer, genres, local) {
     ${typeof trailer === 'undefined' ? '' : `<iframe class='trailers' src=${trailer} height="200" width="300"
     allowfullscreen='true' title="${d.title || d.name} trailer"></iframe>`}
     <p class="overview">${d.overview}</p>
-    <button class = 'saved ${local.includes(d.title) ? 'in-watchlist' : ''}' id='saveBtn '> Save to watchlist</button>
+    <button class = 'saved ${local.includes(d.title || d.name) ? 'in-watchlist' : ''}' id='saveBtn '> ${local.includes(d.title || d.name) ? 'Remove from' : 'Save to'} watchlist</button>
     </div>
     <section class = 'similar-media'></section>
     `
 
     return mediaHTML;
 }
-// ${local.includes(d.title) ? 'Remove from' : 'Save to'}
 // get similar media data
 const getSimilar = async function (data) {
     const request = await fetch(`

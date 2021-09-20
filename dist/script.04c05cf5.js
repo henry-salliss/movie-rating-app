@@ -916,6 +916,8 @@ var paginationCont = document.querySelector('.pagination');
 var nextPgBtn = document.querySelector('#next');
 var prevPgBtn = document.querySelector('#prev');
 var pageNumber = document.querySelector('#pageNum');
+var watchlistBtn = document.querySelector('#watchlistBtn');
+var watchlistSection = document.querySelector('.watchlist-items');
 var page = 1;
 var currentData = {};
 
@@ -1113,7 +1115,9 @@ container.addEventListener('click', function (e) {
     watchlist.push(nameOfMedia);
     localStorage.setItem("watchlist", JSON.stringify(watchlist)); // change text on btn
 
-    if (e.target.classList.contains('in-watchlist')) e.target.textContent = 'Remove from watchlist';
+    if (e.target.classList.contains('in-watchlist')) e.target.textContent = 'Remove from watchlist'; // show message
+
+    watchlistMessage('Added to watchlist', watchlistBtn);
   } else if (e.target.classList.contains('in-watchlist')) {
     e.target.classList.remove('in-watchlist');
     e.target.textContent = 'Save to watchlist';
@@ -1126,8 +1130,43 @@ container.addEventListener('click', function (e) {
     watchlist.splice(index, 1);
     local.splice(index, 1); // update local storage
 
-    localStorage.setItem("watchlist", JSON.stringify(local));
+    localStorage.setItem("watchlist", JSON.stringify(local)); // show message
+
+    watchlistMessage('Removed from watchlist', watchlistBtn);
   }
+}); // show message on watchlist save/remove
+
+var watchlistMessage = function watchlistMessage(msg, location) {
+  var html = "\n      <div class=\"favourite-message\">\n      <p class=\"fav-msg\">".concat(msg, " <i class=\"fas fa-film\"></i></p>\n      </div>\n      ");
+  location.insertAdjacentHTML("beforebegin", html);
+  setTimeout(function () {
+    document.querySelector(".favourite-message").remove();
+  }, 750);
+}; // show watchlist on click
+
+
+watchlistBtn.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (!watchlistSection.classList.contains('reveal')) {
+    console.log('hello');
+    watchlistSection.classList.add('reveal'); // show box section of all names of saved shows
+
+    var watchlistItems = JSON.parse(localStorage.getItem("watchlist"));
+    watchlistItems.forEach(function (item) {
+      var html = "<p class=\"item\">".concat(item, "</p>");
+      watchlistSection.insertAdjacentHTML('afterbegin', html);
+    });
+  } else if (watchlistSection.classList.contains('reveal')) {
+    watchlistSection.classList.remove('reveal');
+    watchlistSection.innerHTML = '';
+  }
+});
+watchlistSection.addEventListener('click', function (e) {
+  if (!e.target.classList.contains('item')) return;
+  searchData(e.target.textContent);
+  watchlistSection.classList.remove('reveal');
+  watchlistSection.innerHTML = '';
 });
 
 var movieDetailed = /*#__PURE__*/function () {
@@ -1318,10 +1357,9 @@ var personDetailed = /*#__PURE__*/function () {
 
 
 var renderDetails = function renderDetails(d, trailer, genres, local) {
-  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(typeof trailer === 'undefined' ? '' : "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>"), "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title) ? 'in-watchlist' : '', "' id='saveBtn '> Save to watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
+  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(typeof trailer === 'undefined' ? '' : "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>"), "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title || d.name) ? 'in-watchlist' : '', "' id='saveBtn '> ").concat(local.includes(d.title || d.name) ? 'Remove from' : 'Save to', " watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
   return mediaHTML;
-}; // ${local.includes(d.title) ? 'Remove from' : 'Save to'}
-// get similar media data
+}; // get similar media data
 
 
 var getSimilar = /*#__PURE__*/function () {
@@ -1567,7 +1605,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51111" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49733" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
