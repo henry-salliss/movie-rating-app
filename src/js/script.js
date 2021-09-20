@@ -85,6 +85,7 @@ popularMoviesSection.addEventListener('click', function (e) {
             // get tv data from results
             const tvData = data.results.find(tvShow => tvShow.name === movieContainer.children[0].children[0].textContent)
             const tvHTML = await tvDetailed(tvData);
+            if (typeof tvHTML === 'undefined') return;
             popularMoviesSection.insertAdjacentHTML('afterbegin', tvHTML);
         };
 
@@ -92,7 +93,6 @@ popularMoviesSection.addEventListener('click', function (e) {
 
     }
     createHTML(currentData);
-
 });
 
 
@@ -104,9 +104,8 @@ container.addEventListener('click', function (e) {
         // clear details and similar media section
         backBtn.remove();
         document.querySelector('.closer-look').innerHTML = '';
-        // document.querySelector('.known-for').innerHTML = ''
-        console.log('hello');
-        // container.innerHTML = '';
+        document.querySelector('.closer-look').style.display = 'none'
+
 
         // restore original state
         title.style.opacity = 1;
@@ -114,7 +113,14 @@ container.addEventListener('click', function (e) {
         paginationCont.style.opacity = 1;
         paginationCont.style.display = 'flex'
         ajax('_', page)
-        document.querySelector('.similar-media').innerHTML = '';
+
+        // clear similar media
+        const similar = document.querySelector('.similar-media');
+        if (similar !== null) similar.innerHTML = '';
+
+        // clear known for media
+        const knownFor = document.querySelector('.known-for');
+        if (knownFor !== null) knownFor.remove();
     }
 })
 
@@ -137,11 +143,58 @@ prevPgBtn.addEventListener('click', function (e) {
     ajax('_', pg)
 })
 
+// make save btn work
+
+let watchlist = [];
+container.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('saved')) return;
+    e.preventDefault();
+    if (!e.target.classList.contains('in-watchlist')) {
+        e.target.classList.add('in-watchlist');
+        e.target.textContent = 'Remove from watchlist'
+        console.log(e.target.textContent);
+        // set watchlist to local storage
+        watchlist = JSON.parse(localStorage.getItem("watchlist"));
+        if (watchlist === null) watchlist = [];
+
+        // get name of media
+        const nameOfMedia = e.target.parentElement.children[0].textContent;
+
+        // update array and local storage
+        watchlist.push(nameOfMedia);
+        localStorage.setItem("watchlist", JSON.stringify(watchlist));
+
+        // change text on btn
+        if (e.target.classList.contains('in-watchlist')) e.target.textContent = 'Remove from watchlist';
+    } else if (e.target.classList.contains('in-watchlist')) {
+        e.target.classList.remove('in-watchlist')
+        e.target.textContent = 'Save to watchlist'
+        console.log(e.target.textContent);
+
+        // get local storage and name of media
+        const local = JSON.parse(localStorage.getItem('watchlist'));
+        const nameOfMedia = e.target.parentElement.children[0].textContent;
+
+        // remove media from watchlist array and local storage
+        const index = watchlist.indexOf(nameOfMedia);
+        watchlist.splice(index, 1);
+        local.splice(index, 1);
+
+        // update local storage
+        localStorage.setItem("watchlist", JSON.stringify(local));
+
+    }
+})
+
 
 
 
 
 const movieDetailed = async function (d) {
+
+    let local = JSON.parse(localStorage.getItem('watchlist'));
+    if (local === null) local = ''
+
     const request = await fetch(`
     https://api.themoviedb.org/3/movie/${d.id}/videos?api_key=${key}&language=en-US`);
 
@@ -162,7 +215,7 @@ const movieDetailed = async function (d) {
     paginationCont.style.display = 'none'
 
     // render the detailed html
-    const html = renderDetails(d, link, genres)
+    const html = renderDetails(d, link, genres, local)
 
     // get similar shows
     const similar = await getSimilar(d);
@@ -174,6 +227,10 @@ const movieDetailed = async function (d) {
 
 
 const tvDetailed = async function (d) {
+
+    let local = JSON.parse(localStorage.getItem('watchlist'));
+    if (local === null) local = ''
+
     const tvRequest = await fetch(`https://api.themoviedb.org/3/tv/${d.id}?api_key=${key}&language=en-US`)
 
     const tvData = await tvRequest.json();
@@ -182,27 +239,29 @@ const tvDetailed = async function (d) {
     const getTrailer = await fetch(`https://api.themoviedb.org/3/tv/${d.id}/videos?api_key=${key}&language=en-US`)
 
     const trailerData = await getTrailer.json();
-    const trailer = trailerData.results[0].key;;
-    const link = `https://www.youtube.com/embed/${trailer}`
+    if (trailerData.results.length > 0) {
+        const trailer = trailerData.results[0].key;
+        const link = `https://www.youtube.com/embed/${trailer}`
+
+        // get genres
+        const genres = await getGenre(d);
 
 
-    // get genres
-    const genres = await getGenre(d);
+        // clear the section and insert details of movie
+        popularMoviesSection.innerHTML = '';
+        title.style.opacity = 0;
+        title.style.display = 'none'
+        paginationCont.style.opacity = 0;
+        paginationCont.style.display = 'none'
 
+        const html = renderDetails(d, link, genres, local)
 
-    // clear the section and insert details of movie
-    popularMoviesSection.innerHTML = '';
-    title.style.opacity = 0;
-    title.style.display = 'none'
-    paginationCont.style.opacity = 0;
-    paginationCont.style.display = 'none'
-
-    const html = renderDetails(d, link, genres)
-
-    // get similar shows
-    const similar = await getSimilar(d);
-    insertSimilar(similar)
-    return html;
+        // get similar shows
+        const similar = await getSimilar(d);
+        insertSimilar(similar)
+        return html;
+    }
+    renderError('Could not get latest data for show try again later', container)
 };
 
 const personDetailed = async function (data) {
@@ -240,16 +299,19 @@ const personDetailed = async function (data) {
             `
             knownForMovies.insertAdjacentHTML('beforeend', knownForHTML);
         })
-
+        // look at known for movies
         container.addEventListener('click', function (e) {
-            if (e.target.classList.contains('known-for')) return;
+            // conditions
+            if (e.target.classList.contains('known-for') || e.target.parentElement === null) return;
             if (typeof knownForMovies === 'undefined') return;
-            knownForMovies.innerHTML = '';
-            const closeLook = document.querySelector('.closer-look');
-            if (typeof closeLook != 'null') {
-                closeLook.remove()
-                const title = e.target.closest('article').children[0].children[0].textContent;
-                searchData(title)
+            if (e.target.parentElement.classList.contains('similar-media') || e.target.parentElement.classList.contains('details')) {
+                knownForMovies.innerHTML = '';
+                const closeLook = document.querySelector('.closer-look');
+                if (typeof closeLook != 'null') {
+                    closeLook.remove()
+                    const title = e.target.closest('article').children[0].children[0].textContent;
+                    searchData(title)
+                }
             }
         })
     }, 1000)
@@ -266,7 +328,7 @@ const personDetailed = async function (data) {
 
 // create detailed HTML for media
 
-const renderDetails = function (d, trailer, genres) {
+const renderDetails = function (d, trailer, genres, local) {
     const mediaHTML = `
     ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
     
@@ -277,16 +339,17 @@ const renderDetails = function (d, trailer, genres) {
         <p class="rating">${d.vote_average}<i class="fas fa-star star"></i></p>
         <p>Pop rating: ${Math.floor(d.popularity)}</p>
     </div>
-    <iframe class='trailers' src=${trailer} height="200" width="300"
-        allowfullscreen='true' title="${d.title || d.name} trailer"></iframe>
+    ${typeof trailer === 'undefined' ? '' : `<iframe class='trailers' src=${trailer} height="200" width="300"
+    allowfullscreen='true' title="${d.title || d.name} trailer"></iframe>`}
     <p class="overview">${d.overview}</p>
+    <button class = 'saved ${local.includes(d.title) ? 'in-watchlist' : ''}' id='saveBtn '> Save to watchlist</button>
     </div>
     <section class = 'similar-media'></section>
     `
 
     return mediaHTML;
 }
-
+// ${local.includes(d.title) ? 'Remove from' : 'Save to'}
 // get similar media data
 const getSimilar = async function (data) {
     const request = await fetch(`
@@ -299,7 +362,7 @@ const getSimilar = async function (data) {
 
 // similar shows and movies html
 const insertSimilar = function (data) {
-    if (data.results.length === 0) return;
+    if (data.success === false || data.results.length === 0) return;
     // wait 1 second so similar media section is not null
     setTimeout(() => {
         const section = document.querySelector('.similar-media')
@@ -323,16 +386,17 @@ const insertSimilar = function (data) {
         })
         // get more details of similar media
         container.addEventListener('click', function (e) {
-            if (e.target.classList.contains('similar-media')) return;
-            // hide section
-            section.innerHTML = '';
-
-            if (typeof section === 'undefined') return;
-            const closeLook = document.querySelector('.closer-look');
-            if (typeof closeLook !== 'null') {
-                closeLook.remove()
-                const title = e.target.closest('article').children[0].children[0].textContent;
-                searchData(title)
+            if (e.target.classList.contains('similar-media') || e.target.parentElement === null) return;
+            if (e.target.parentElement.classList.contains('similar-media') || e.target.parentElement.classList.contains('details')) {
+                // hide section
+                section.innerHTML = '';
+                if (typeof section === 'undefined') return;
+                const closeLook = document.querySelector('.closer-look');
+                if (typeof closeLook !== 'null') {
+                    closeLook.remove()
+                    const title = e.target.closest('article').children[0].children[0].textContent;
+                    searchData(title)
+                }
             }
         })
     }, 1000)

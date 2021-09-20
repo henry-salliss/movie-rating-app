@@ -52,16 +52,13 @@
 
   .search{
       text-align: center;
-      display: flex;
-      flex-direction: row;
-      margin-left: 20%;
-      
   }
 
   #inputField{
       height: fit-content;
       width: 50%;
       margin-right: 5%;
+      font-size: 0.8em;
   }
 
   #searchBtn{
@@ -78,6 +75,15 @@
       background-color: #dde748;
   }
 
+  #watchlistBtn{
+      color: white;
+      background-color: black;
+      font-size: 1.5em;
+  }
+
+  .title{
+      font-size: 1.5em;
+  }
 
   
   /* closer look styles */
@@ -85,7 +91,7 @@
   .closer-look{
       display: flex;
       text-align: center;
-      margin: 5%;
+      margin: 3%;
       background-color: white;
       box-shadow: 6px 5px 5px 5px rgba(0,0,0,0.53);
       font-size: 0.9em;
@@ -124,6 +130,20 @@
     
     .media-type{
         display: none;
+    }
+
+    .saved{
+        width: fit-content;
+        margin: auto;
+        padding: 1%;
+        background-color: royalblue;
+        color: white;
+        border-radius: 5%;
+        margin: 5% auto 5% auto;
+    }
+
+    .in-watchlist{
+        background-color: red;
     }
 
 
@@ -294,8 +314,75 @@
     justify-content: space-around;
 }
 
-.star{
-    color: yellow;
-}
   
 }
+
+
+  /************************** desktop styles  **********************************************************************************************************/
+
+  @media only screen and (min-width: 768px) {
+
+    /* Base styles desktop */
+
+    h1{
+        padding: 2%;
+        margin-top: 5%;
+        font-size: 2em;
+    }
+    
+    /* Search section styles desktop */
+    
+    .appTitle{
+        font-size: 3em;
+    }
+
+
+    .search-section{
+        padding: 1%;
+    }
+  
+    .search{
+        margin-left: 0%;
+        font-size: 5em;
+         
+    }
+  
+    #inputField{
+        width: 200px;
+    }
+  
+    #backBtn{
+        font-size: 4em;
+    }
+
+    /* closer look styles desktop */
+
+  .closer-look{
+    margin: 5% 20% 5% 20%;
+    font-size: 1em;
+  }
+  
+  .closer-look p {
+      font-size: 1.2em;
+  }
+
+
+    /* movie tile styles ipad */
+    .movie-title{
+        margin: auto;
+    }
+
+
+    .movie-poster{
+        width: 100px;
+    }
+
+    .movie-tile{
+        margin: 2% 15% 2% 15%;
+        padding: 1%;
+        font-size: 1.2em;
+        justify-content: space-around;
+        width: 50%;
+        margin-left: 25%;
+    }
+  }

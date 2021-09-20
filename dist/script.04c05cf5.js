@@ -1011,7 +1011,7 @@ popularMoviesSection.addEventListener('click', function (e) {
 
             case 9:
               if (!(mediaType === '(tv)')) {
-                _context2.next = 15;
+                _context2.next = 17;
                 break;
               }
 
@@ -1024,12 +1024,21 @@ popularMoviesSection.addEventListener('click', function (e) {
 
             case 13:
               tvHTML = _context2.sent;
-              popularMoviesSection.insertAdjacentHTML('afterbegin', tvHTML);
 
-            case 15:
-              ;
+              if (!(typeof tvHTML === 'undefined')) {
+                _context2.next = 16;
+                break;
+              }
+
+              return _context2.abrupt("return");
 
             case 16:
+              popularMoviesSection.insertAdjacentHTML('afterbegin', tvHTML);
+
+            case 17:
+              ;
+
+            case 18:
             case "end":
               return _context2.stop();
           }
@@ -1052,17 +1061,20 @@ container.addEventListener('click', function (e) {
   if (e.target === backBtn) {
     // clear details and similar media section
     backBtn.remove();
-    document.querySelector('.closer-look').innerHTML = ''; // document.querySelector('.known-for').innerHTML = ''
-
-    console.log('hello'); // container.innerHTML = '';
-    // restore original state
+    document.querySelector('.closer-look').innerHTML = '';
+    document.querySelector('.closer-look').style.display = 'none'; // restore original state
 
     title.style.opacity = 1;
     title.style.display = 'flex';
     paginationCont.style.opacity = 1;
     paginationCont.style.display = 'flex';
-    ajax('_', page);
-    document.querySelector('.similar-media').innerHTML = '';
+    ajax('_', page); // clear similar media
+
+    var similar = document.querySelector('.similar-media');
+    if (similar !== null) similar.innerHTML = ''; // clear known for media
+
+    var knownFor = document.querySelector('.known-for');
+    if (knownFor !== null) knownFor.remove();
   }
 }); // Make next pagination work
 
@@ -1081,32 +1093,69 @@ prevPgBtn.addEventListener('click', function (e) {
   pageNumber.textContent = "Page ".concat(pg);
   popularMoviesSection.innerHTML = '';
   ajax('_', pg);
+}); // make save btn work
+
+var watchlist = [];
+container.addEventListener('click', function (e) {
+  if (!e.target.classList.contains('saved')) return;
+  e.preventDefault();
+
+  if (!e.target.classList.contains('in-watchlist')) {
+    e.target.classList.add('in-watchlist');
+    e.target.textContent = 'Remove from watchlist';
+    console.log(e.target.textContent); // set watchlist to local storage
+
+    watchlist = JSON.parse(localStorage.getItem("watchlist"));
+    if (watchlist === null) watchlist = []; // get name of media
+
+    var nameOfMedia = e.target.parentElement.children[0].textContent; // update array and local storage
+
+    watchlist.push(nameOfMedia);
+    localStorage.setItem("watchlist", JSON.stringify(watchlist)); // change text on btn
+
+    if (e.target.classList.contains('in-watchlist')) e.target.textContent = 'Remove from watchlist';
+  } else if (e.target.classList.contains('in-watchlist')) {
+    e.target.classList.remove('in-watchlist');
+    e.target.textContent = 'Save to watchlist';
+    console.log(e.target.textContent); // get local storage and name of media
+
+    var local = JSON.parse(localStorage.getItem('watchlist'));
+    var _nameOfMedia = e.target.parentElement.children[0].textContent; // remove media from watchlist array and local storage
+
+    var index = watchlist.indexOf(_nameOfMedia);
+    watchlist.splice(index, 1);
+    local.splice(index, 1); // update local storage
+
+    localStorage.setItem("watchlist", JSON.stringify(local));
+  }
 });
 
 var movieDetailed = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(d) {
-    var request, movieData, trailer, link, genres, html, similar;
+    var local, request, movieData, trailer, link, genres, html, similar;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _context3.next = 2;
+            local = JSON.parse(localStorage.getItem('watchlist'));
+            if (local === null) local = '';
+            _context3.next = 4;
             return fetch("\n    https://api.themoviedb.org/3/movie/".concat(d.id, "/videos?api_key=").concat(_config.key, "&language=en-US"));
 
-          case 2:
+          case 4:
             request = _context3.sent;
-            _context3.next = 5;
+            _context3.next = 7;
             return request.json();
 
-          case 5:
+          case 7:
             movieData = _context3.sent;
             trailer = movieData.results[0].key;
             link = "https://www.youtube.com/embed/".concat(trailer); // get movie genres
 
-            _context3.next = 10;
+            _context3.next = 12;
             return getGenre(d);
 
-          case 10:
+          case 12:
             genres = _context3.sent;
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
@@ -1116,17 +1165,17 @@ var movieDetailed = /*#__PURE__*/function () {
 
             paginationCont.style.display = 'none'; // render the detailed html
 
-            html = renderDetails(d, link, genres); // get similar shows
+            html = renderDetails(d, link, genres, local); // get similar shows
 
-            _context3.next = 19;
+            _context3.next = 21;
             return getSimilar(d);
 
-          case 19:
+          case 21:
             similar = _context3.sent;
             insertSimilar(similar);
             return _context3.abrupt("return", html);
 
-          case 22:
+          case 24:
           case "end":
             return _context3.stop();
         }
@@ -1141,39 +1190,46 @@ var movieDetailed = /*#__PURE__*/function () {
 
 var tvDetailed = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(d) {
-    var tvRequest, tvData, getTrailer, trailerData, trailer, link, genres, html, similar;
+    var local, tvRequest, tvData, getTrailer, trailerData, trailer, link, genres, html, similar;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _context4.next = 2;
+            local = JSON.parse(localStorage.getItem('watchlist'));
+            if (local === null) local = '';
+            _context4.next = 4;
             return fetch("https://api.themoviedb.org/3/tv/".concat(d.id, "?api_key=").concat(_config.key, "&language=en-US"));
 
-          case 2:
+          case 4:
             tvRequest = _context4.sent;
-            _context4.next = 5;
+            _context4.next = 7;
             return tvRequest.json();
 
-          case 5:
+          case 7:
             tvData = _context4.sent;
-            _context4.next = 8;
+            _context4.next = 10;
             return fetch("https://api.themoviedb.org/3/tv/".concat(d.id, "/videos?api_key=").concat(_config.key, "&language=en-US"));
 
-          case 8:
+          case 10:
             getTrailer = _context4.sent;
-            _context4.next = 11;
+            _context4.next = 13;
             return getTrailer.json();
 
-          case 11:
+          case 13:
             trailerData = _context4.sent;
+
+            if (!(trailerData.results.length > 0)) {
+              _context4.next = 31;
+              break;
+            }
+
             trailer = trailerData.results[0].key;
-            ;
             link = "https://www.youtube.com/embed/".concat(trailer); // get genres
 
-            _context4.next = 17;
+            _context4.next = 19;
             return getGenre(d);
 
-          case 17:
+          case 19:
             genres = _context4.sent;
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
@@ -1181,17 +1237,20 @@ var tvDetailed = /*#__PURE__*/function () {
             title.style.display = 'none';
             paginationCont.style.opacity = 0;
             paginationCont.style.display = 'none';
-            html = renderDetails(d, link, genres); // get similar shows
+            html = renderDetails(d, link, genres, local); // get similar shows
 
-            _context4.next = 26;
+            _context4.next = 28;
             return getSimilar(d);
 
-          case 26:
+          case 28:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 29:
+          case 31:
+            (0, _config.renderError)('Could not get latest data for show try again later', container);
+
+          case 32:
           case "end":
             return _context4.stop();
         }
@@ -1217,17 +1276,22 @@ var personDetailed = /*#__PURE__*/function () {
               data.known_for.forEach(function (movie) {
                 var knownForHTML = "\n            <article class='movie-tile'>\n            <div class = 'details'>\n            <h2 class ='movie-title'>".concat(movie.title, "</h2>\n            <p>").concat(movie.release_date, "</p>\n            <p><i class=\"fas fa-star star\"></i> ").concat(Math.floor(movie.vote_average), "/10</p>\n            </div>\n            <img class='movie-poster' src='https://image.tmdb.org/t/p/w500").concat(movie.poster_path, "'>\n            </article>\n            ");
                 knownForMovies.insertAdjacentHTML('beforeend', knownForHTML);
-              });
-              container.addEventListener('click', function (e) {
-                if (e.target.classList.contains('known-for')) return;
-                if (typeof knownForMovies === 'undefined') return;
-                knownForMovies.innerHTML = '';
-                var closeLook = document.querySelector('.closer-look');
+              }); // look at known for movies
 
-                if (typeof closeLook != 'null') {
-                  closeLook.remove();
-                  var _title = e.target.closest('article').children[0].children[0].textContent;
-                  searchData(_title);
+              container.addEventListener('click', function (e) {
+                // conditions
+                if (e.target.classList.contains('known-for') || e.target.parentElement === null) return;
+                if (typeof knownForMovies === 'undefined') return;
+
+                if (e.target.parentElement.classList.contains('similar-media') || e.target.parentElement.classList.contains('details')) {
+                  knownForMovies.innerHTML = '';
+                  var closeLook = document.querySelector('.closer-look');
+
+                  if (typeof closeLook != 'null') {
+                    closeLook.remove();
+                    var _title = e.target.closest('article').children[0].children[0].textContent;
+                    searchData(_title);
+                  }
                 }
               });
             }, 1000); // clear the section and insert details of movie
@@ -1253,10 +1317,11 @@ var personDetailed = /*#__PURE__*/function () {
 }(); // create detailed HTML for media
 
 
-var renderDetails = function renderDetails(d, trailer, genres) {
-  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    <iframe class='trailers' src=").concat(trailer, " height=\"200\" width=\"300\"\n        allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>\n    <p class=\"overview\">").concat(d.overview, "</p>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
+var renderDetails = function renderDetails(d, trailer, genres, local) {
+  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(typeof trailer === 'undefined' ? '' : "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>"), "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title) ? 'in-watchlist' : '', "' id='saveBtn '> Save to watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
   return mediaHTML;
-}; // get similar media data
+}; // ${local.includes(d.title) ? 'Remove from' : 'Save to'}
+// get similar media data
 
 
 var getSimilar = /*#__PURE__*/function () {
@@ -1293,7 +1358,7 @@ var getSimilar = /*#__PURE__*/function () {
 
 
 var insertSimilar = function insertSimilar(data) {
-  if (data.results.length === 0) return; // wait 1 second so similar media section is not null
+  if (data.success === false || data.results.length === 0) return; // wait 1 second so similar media section is not null
 
   setTimeout(function () {
     var section = document.querySelector('.similar-media'); // get first five results
@@ -1306,16 +1371,19 @@ var insertSimilar = function insertSimilar(data) {
     }); // get more details of similar media
 
     container.addEventListener('click', function (e) {
-      if (e.target.classList.contains('similar-media')) return; // hide section
+      if (e.target.classList.contains('similar-media') || e.target.parentElement === null) return;
 
-      section.innerHTML = '';
-      if (typeof section === 'undefined') return;
-      var closeLook = document.querySelector('.closer-look');
+      if (e.target.parentElement.classList.contains('similar-media') || e.target.parentElement.classList.contains('details')) {
+        // hide section
+        section.innerHTML = '';
+        if (typeof section === 'undefined') return;
+        var closeLook = document.querySelector('.closer-look');
 
-      if (typeof closeLook !== 'null') {
-        closeLook.remove();
-        var _title2 = e.target.closest('article').children[0].children[0].textContent;
-        searchData(_title2);
+        if (typeof closeLook !== 'null') {
+          closeLook.remove();
+          var _title2 = e.target.closest('article').children[0].children[0].textContent;
+          searchData(_title2);
+        }
       }
     });
   }, 1000);
@@ -1499,7 +1567,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50788" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50020" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
