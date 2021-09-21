@@ -1104,8 +1104,7 @@ container.addEventListener('click', function (e) {
 
   if (!e.target.classList.contains('in-watchlist')) {
     e.target.classList.add('in-watchlist');
-    e.target.textContent = 'Remove from watchlist';
-    console.log(e.target.textContent); // set watchlist to local storage
+    e.target.textContent = 'Remove from watchlist'; // set watchlist to local storage
 
     watchlist = JSON.parse(localStorage.getItem("watchlist"));
     if (watchlist === null) watchlist = []; // get name of media
@@ -1120,8 +1119,7 @@ container.addEventListener('click', function (e) {
     watchlistMessage('Added to watchlist', watchlistBtn);
   } else if (e.target.classList.contains('in-watchlist')) {
     e.target.classList.remove('in-watchlist');
-    e.target.textContent = 'Save to watchlist';
-    console.log(e.target.textContent); // get local storage and name of media
+    e.target.textContent = 'Save to watchlist'; // get local storage and name of media
 
     var local = JSON.parse(localStorage.getItem('watchlist'));
     var _nameOfMedia = e.target.parentElement.children[0].textContent; // remove media from watchlist array and local storage
@@ -1149,7 +1147,6 @@ watchlistBtn.addEventListener('click', function (e) {
   e.preventDefault();
 
   if (!watchlistSection.classList.contains('reveal')) {
-    console.log('hello');
     watchlistSection.classList.add('reveal'); // show box section of all names of saved shows
 
     var watchlistItems = JSON.parse(localStorage.getItem("watchlist"));
@@ -1229,7 +1226,8 @@ var movieDetailed = /*#__PURE__*/function () {
 
 var tvDetailed = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(d) {
-    var local, tvRequest, tvData, getTrailer, trailerData, trailer, link, genres, html, similar;
+    var local, tvRequest, tvData, getTrailer, trailerData, trailer, link, _genres, _html2, _similar, genres, html, similar;
+
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -1269,6 +1267,28 @@ var tvDetailed = /*#__PURE__*/function () {
             return getGenre(d);
 
           case 19:
+            _genres = _context4.sent;
+            // clear the section and insert details of movie
+            popularMoviesSection.innerHTML = '';
+            title.style.opacity = 0;
+            title.style.display = 'none';
+            paginationCont.style.opacity = 0;
+            paginationCont.style.display = 'none';
+            _html2 = renderDetails(d, link, _genres, local); // get similar shows
+
+            _context4.next = 28;
+            return getSimilar(d);
+
+          case 28:
+            _similar = _context4.sent;
+            insertSimilar(_similar);
+            return _context4.abrupt("return", _html2);
+
+          case 31:
+            _context4.next = 33;
+            return getGenre(d);
+
+          case 33:
             genres = _context4.sent;
             // clear the section and insert details of movie
             popularMoviesSection.innerHTML = '';
@@ -1276,20 +1296,17 @@ var tvDetailed = /*#__PURE__*/function () {
             title.style.display = 'none';
             paginationCont.style.opacity = 0;
             paginationCont.style.display = 'none';
-            html = renderDetails(d, link, genres, local); // get similar shows
+            html = renderDetails(d, '_', genres, local); // get similar shows
 
-            _context4.next = 28;
+            _context4.next = 42;
             return getSimilar(d);
 
-          case 28:
+          case 42:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 31:
-            (0, _config.renderError)('Could not get latest data for show try again later', container);
-
-          case 32:
+          case 45:
           case "end":
             return _context4.stop();
         }
@@ -1326,7 +1343,7 @@ var personDetailed = /*#__PURE__*/function () {
                   knownForMovies.innerHTML = '';
                   var closeLook = document.querySelector('.closer-look');
 
-                  if (typeof closeLook != 'null') {
+                  if (typeof closeLook != 'null' || typeof closeLook != 'never') {
                     closeLook.remove();
                     var _title = e.target.closest('article').children[0].children[0].textContent;
                     searchData(_title);
@@ -1357,7 +1374,11 @@ var personDetailed = /*#__PURE__*/function () {
 
 
 var renderDetails = function renderDetails(d, trailer, genres, local) {
-  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(typeof trailer === 'undefined' ? '' : "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>"), "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title || d.name) ? 'in-watchlist' : '', "' id='saveBtn '> ").concat(local.includes(d.title || d.name) ? 'Remove from' : 'Save to', " watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
+  var media; // make media a trailer or poster depending if trailer exists
+
+  if (trailer === '_') media = "<img class ='stand-in-poster' src='https://image.tmdb.org/t/p/w500".concat(d.poster_path, "'></img>");
+  if (trailer !== '_') media = "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>");
+  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(media, "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title || d.name) ? 'in-watchlist' : '', "' id='saveBtn '> ").concat(local.includes(d.title || d.name) ? 'Remove from' : 'Save to', " watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
   return mediaHTML;
 }; // get similar media data
 
@@ -1417,7 +1438,8 @@ var insertSimilar = function insertSimilar(data) {
         if (typeof section === 'undefined') return;
         var closeLook = document.querySelector('.closer-look');
 
-        if (typeof closeLook !== 'null') {
+        if (typeof closeLook != 'null' || typeof closeLook != 'never') {
+          if (closeLook === null) return;
           closeLook.remove();
           var _title2 = e.target.closest('article').children[0].children[0].textContent;
           searchData(_title2);
@@ -1469,7 +1491,7 @@ var getGenre = /*#__PURE__*/function () {
 
 var searchData = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(query) {
-    var request, data, html, _html2, _html3;
+    var request, data, html, _html3, _html4;
 
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -1510,9 +1532,9 @@ var searchData = /*#__PURE__*/function () {
             return movieDetailed(data.results[0]);
 
           case 16:
-            _html2 = _context8.sent;
+            _html3 = _context8.sent;
             // container.insertAdjacentHTML('afterbegin', html)
-            popularMoviesSection.innerHTML = _html2;
+            popularMoviesSection.innerHTML = _html3;
 
           case 18:
             if (!(data.results[0].media_type === 'person')) {
@@ -1525,8 +1547,8 @@ var searchData = /*#__PURE__*/function () {
             return personDetailed(data.results[0]);
 
           case 22:
-            _html3 = _context8.sent;
-            popularMoviesSection.innerHTML = _html3;
+            _html4 = _context8.sent;
+            popularMoviesSection.innerHTML = _html4;
 
           case 24:
             _context8.next = 29;

@@ -153,7 +153,6 @@ container.addEventListener('click', function (e) {
     if (!e.target.classList.contains('in-watchlist')) {
         e.target.classList.add('in-watchlist');
         e.target.textContent = 'Remove from watchlist'
-        console.log(e.target.textContent);
         // set watchlist to local storage
         watchlist = JSON.parse(localStorage.getItem("watchlist"));
         if (watchlist === null) watchlist = [];
@@ -173,7 +172,6 @@ container.addEventListener('click', function (e) {
     } else if (e.target.classList.contains('in-watchlist')) {
         e.target.classList.remove('in-watchlist')
         e.target.textContent = 'Save to watchlist'
-        console.log(e.target.textContent);
 
         // get local storage and name of media
         const local = JSON.parse(localStorage.getItem('watchlist'));
@@ -212,7 +210,6 @@ const watchlistMessage = function (msg, location) {
 watchlistBtn.addEventListener('click', function (e) {
     e.preventDefault();
     if (!watchlistSection.classList.contains('reveal')) {
-        console.log('hello');
         watchlistSection.classList.add('reveal');
         // show box section of all names of saved shows
         const watchlistItems = JSON.parse(localStorage.getItem("watchlist"));
@@ -309,7 +306,26 @@ const tvDetailed = async function (d) {
         insertSimilar(similar)
         return html;
     }
-    renderError('Could not get latest data for show try again later', container)
+
+    // if no trailer available
+
+    // get genres
+    const genres = await getGenre(d);
+
+    // clear the section and insert details of movie
+    popularMoviesSection.innerHTML = '';
+    title.style.opacity = 0;
+    title.style.display = 'none'
+    paginationCont.style.opacity = 0;
+    paginationCont.style.display = 'none'
+
+    const html = renderDetails(d, '_', genres, local)
+
+    // get similar shows
+    const similar = await getSimilar(d);
+    insertSimilar(similar)
+    return html;
+    // renderError('Could not get latest data for show try again later', container)
 };
 
 const personDetailed = async function (data) {
@@ -355,7 +371,7 @@ const personDetailed = async function (data) {
             if (e.target.parentElement.classList.contains('similar-media') || e.target.parentElement.classList.contains('details')) {
                 knownForMovies.innerHTML = '';
                 const closeLook = document.querySelector('.closer-look');
-                if (typeof closeLook != 'null') {
+                if (typeof closeLook != 'null' || typeof closeLook != 'never') {
                     closeLook.remove()
                     const title = e.target.closest('article').children[0].children[0].textContent;
                     searchData(title)
@@ -377,6 +393,16 @@ const personDetailed = async function (data) {
 // create detailed HTML for media
 
 const renderDetails = function (d, trailer, genres, local) {
+    let media;
+
+    // make media a trailer or poster depending if trailer exists
+    if (trailer === '_') media = `<img class ='stand-in-poster' src='https://image.tmdb.org/t/p/w500${d.poster_path}'></img>`;
+
+    if (trailer !== '_') media = `<iframe class='trailers' src=${trailer} height="200" width="300"
+    allowfullscreen='true' title="${d.title || d.name} trailer"></iframe>`
+
+
+
     const mediaHTML = `
     ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
     
@@ -387,8 +413,7 @@ const renderDetails = function (d, trailer, genres, local) {
         <p class="rating">${d.vote_average}<i class="fas fa-star star"></i></p>
         <p>Pop rating: ${Math.floor(d.popularity)}</p>
     </div>
-    ${typeof trailer === 'undefined' ? '' : `<iframe class='trailers' src=${trailer} height="200" width="300"
-    allowfullscreen='true' title="${d.title || d.name} trailer"></iframe>`}
+    ${media}
     <p class="overview">${d.overview}</p>
     <button class = 'saved ${local.includes(d.title || d.name) ? 'in-watchlist' : ''}' id='saveBtn '> ${local.includes(d.title || d.name) ? 'Remove from' : 'Save to'} watchlist</button>
     </div>
@@ -439,7 +464,8 @@ const insertSimilar = function (data) {
                 section.innerHTML = '';
                 if (typeof section === 'undefined') return;
                 const closeLook = document.querySelector('.closer-look');
-                if (typeof closeLook !== 'null') {
+                if (typeof closeLook != 'null' || typeof closeLook != 'never') {
+                    if (closeLook === null) return;
                     closeLook.remove()
                     const title = e.target.closest('article').children[0].children[0].textContent;
                     searchData(title)

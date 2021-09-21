@@ -148,9 +148,15 @@
     }
     
     .person-poster{
-        transform: scale(0.5);
-        margin-top: -40%;
-        margin-bottom: -25%;
+        width: 150px;
+        margin: auto;
+     /* margin-top: -40%; */
+        margin-bottom: 5%; 
+    }
+
+    .stand-in-poster{
+        width: 150px;
+        margin: auto;
     }
     
     .closer-look p {
@@ -407,7 +413,6 @@
   
     .search{
         margin-left: 0%;
-        font-size: 5em;
          
     }
   
