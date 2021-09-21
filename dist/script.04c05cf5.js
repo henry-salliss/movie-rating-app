@@ -880,7 +880,7 @@ try {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.renderError = exports.url = exports.key = void 0;
+exports.restoreState = exports.clearSection = exports.renderError = exports.url = exports.key = void 0;
 var key = "c87d7d62b65ce4618fb6a823d65be34a";
 exports.key = key;
 var url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=";
@@ -893,6 +893,26 @@ var renderError = function renderError(msg, cont) {
 };
 
 exports.renderError = renderError;
+
+var clearSection = function clearSection(section, title, pag) {
+  section.innerHTML = '';
+  title.style.opacity = 0;
+  title.style.display = 'none';
+  pag.style.opacity = 0;
+  pag.style.display = 'none';
+};
+
+exports.clearSection = clearSection;
+
+var restoreState = function restoreState(title, pagCont, pg, func) {
+  title.style.opacity = 1;
+  title.style.display = 'flex';
+  pagCont.style.opacity = 1;
+  pagCont.style.display = 'flex';
+  func('_', pg);
+};
+
+exports.restoreState = restoreState;
 },{}],"src/js/script.js":[function(require,module,exports) {
 "use strict";
 
@@ -1063,14 +1083,9 @@ container.addEventListener('click', function (e) {
   if (e.target === backBtn) {
     // clear details and similar media section
     backBtn.remove();
-    document.querySelector('.closer-look').innerHTML = '';
-    document.querySelector('.closer-look').style.display = 'none'; // restore original state
+    document.querySelector('.closer-look').remove(); // restore original state
 
-    title.style.opacity = 1;
-    title.style.display = 'flex';
-    paginationCont.style.opacity = 1;
-    paginationCont.style.display = 'flex';
-    ajax('_', page); // clear similar media
+    (0, _config.restoreState)(title, paginationCont, page, ajax); // clear similar media
 
     var similar = document.querySelector('.similar-media');
     if (similar !== null) similar.innerHTML = ''; // clear known for media
@@ -1194,24 +1209,19 @@ var movieDetailed = /*#__PURE__*/function () {
           case 12:
             genres = _context3.sent;
             // clear the section and insert details of movie
-            popularMoviesSection.innerHTML = '';
-            title.style.opacity = 0;
-            title.style.display = 'none';
-            paginationCont.style.opacity = 0; // paginationCont.style.height = 0;
-
-            paginationCont.style.display = 'none'; // render the detailed html
+            (0, _config.clearSection)(popularMoviesSection, title, paginationCont); // render the detailed html
 
             html = renderDetails(d, link, genres, local); // get similar shows
 
-            _context3.next = 21;
+            _context3.next = 17;
             return getSimilar(d);
 
-          case 21:
+          case 17:
             similar = _context3.sent;
             insertSimilar(similar);
             return _context3.abrupt("return", html);
 
-          case 24:
+          case 20:
           case "end":
             return _context3.stop();
         }
@@ -1256,7 +1266,7 @@ var tvDetailed = /*#__PURE__*/function () {
             trailerData = _context4.sent;
 
             if (!(trailerData.results.length > 0)) {
-              _context4.next = 31;
+              _context4.next = 27;
               break;
             }
 
@@ -1269,44 +1279,36 @@ var tvDetailed = /*#__PURE__*/function () {
           case 19:
             _genres = _context4.sent;
             // clear the section and insert details of movie
-            popularMoviesSection.innerHTML = '';
-            title.style.opacity = 0;
-            title.style.display = 'none';
-            paginationCont.style.opacity = 0;
-            paginationCont.style.display = 'none';
+            (0, _config.clearSection)(popularMoviesSection, title, paginationCont);
             _html2 = renderDetails(d, link, _genres, local); // get similar shows
 
-            _context4.next = 28;
+            _context4.next = 24;
             return getSimilar(d);
 
-          case 28:
+          case 24:
             _similar = _context4.sent;
             insertSimilar(_similar);
             return _context4.abrupt("return", _html2);
 
-          case 31:
-            _context4.next = 33;
+          case 27:
+            _context4.next = 29;
             return getGenre(d);
 
-          case 33:
+          case 29:
             genres = _context4.sent;
             // clear the section and insert details of movie
-            popularMoviesSection.innerHTML = '';
-            title.style.opacity = 0;
-            title.style.display = 'none';
-            paginationCont.style.opacity = 0;
-            paginationCont.style.display = 'none';
+            (0, _config.clearSection)(popularMoviesSection, title, paginationCont);
             html = renderDetails(d, '_', genres, local); // get similar shows
 
-            _context4.next = 42;
+            _context4.next = 34;
             return getSimilar(d);
 
-          case 42:
+          case 34:
             similar = _context4.sent;
             insertSimilar(similar);
             return _context4.abrupt("return", html);
 
-          case 45:
+          case 37:
           case "end":
             return _context4.stop();
         }
@@ -1326,7 +1328,7 @@ var personDetailed = /*#__PURE__*/function () {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            html = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    <div class = 'closer-look'>\n    <h2>").concat(data.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'gender'>").concat(data.gender === 1 ? 'Female' : 'Male', "</p>\n        <p class=\"rating\">").concat(data.known_for_department, " \uD83C\uDFAC</p>\n        <p>Pop rating: ").concat(Math.floor(data.popularity), "<i class=\"fas fa-star star\"></i></p>\n    </div>\n    <div class = 'personImg'>\n    <img class ='person-poster'src = 'https://image.tmdb.org/t/p/w500").concat(data.profile_path, "'>\n    </div>\n    </div>\n\n    <section class = 'known-for'>\n    <h1>Known for...</h1\n    </section>\n    ");
+            html = "\n    <div class = 'closer-look'>\n    <h2>".concat(data.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'gender'>").concat(data.gender === 1 ? 'Female' : 'Male', "</p>\n        <p class=\"rating\">").concat(data.known_for_department, " \uD83C\uDFAC</p>\n        <p>Pop rating: ").concat(Math.floor(data.popularity), "<i class=\"fas fa-star star\"></i></p>\n    </div>\n    <div class = 'personImg'>\n    <img class ='person-poster'src = 'https://image.tmdb.org/t/p/w500").concat(data.profile_path, "'>\n    </div>\n    </div>\n\n    <section class = 'known-for'>\n    <h1>Known for...</h1\n    </section>\n    ");
             setTimeout(function () {
               var knownForMovies = document.querySelector('.known-for');
               data.known_for.forEach(function (movie) {
@@ -1349,17 +1351,16 @@ var personDetailed = /*#__PURE__*/function () {
                     searchData(_title);
                   }
                 }
-              });
+              }); // insert back btn
+
+              var btn = "".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>');
+              document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
             }, 1000); // clear the section and insert details of movie
 
-            popularMoviesSection.innerHTML = '';
-            title.style.opacity = 0;
-            title.style.display = 'none';
-            paginationCont.style.opacity = 0;
-            paginationCont.style.display = 'none';
+            (0, _config.clearSection)(popularMoviesSection, title, paginationCont);
             return _context5.abrupt("return", html);
 
-          case 8:
+          case 4:
           case "end":
             return _context5.stop();
         }
@@ -1378,7 +1379,7 @@ var renderDetails = function renderDetails(d, trailer, genres, local) {
 
   if (trailer === '_') media = "<img class ='stand-in-poster' src='https://image.tmdb.org/t/p/w500".concat(d.poster_path, "'></img>");
   if (trailer !== '_') media = "<iframe class='trailers' src=".concat(trailer, " height=\"200\" width=\"300\"\n    allowfullscreen='true' title=\"").concat(d.title || d.name, " trailer\"></iframe>");
-  var mediaHTML = "\n    ".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>', "\n    \n    <div class='closer-look'>\n    <h2>").concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(media, "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title || d.name) ? 'in-watchlist' : '', "' id='saveBtn '> ").concat(local.includes(d.title || d.name) ? 'Remove from' : 'Save to', " watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
+  var mediaHTML = "\n    <div class='closer-look'>\n    <h2>".concat(d.title || d.name, "</h2>\n    <div class=\"mini-details\">\n    <p class = 'genre'>").concat(genres, "</p>\n        <p class=\"rating\">").concat(d.vote_average, "<i class=\"fas fa-star star\"></i></p>\n        <p>Pop rating: ").concat(Math.floor(d.popularity), "</p>\n    </div>\n    ").concat(media, "\n    <p class=\"overview\">").concat(d.overview, "</p>\n    <button class = 'saved ").concat(local.includes(d.title || d.name) ? 'in-watchlist' : '', "' id='saveBtn '> ").concat(local.includes(d.title || d.name) ? 'Remove from' : 'Save to', " watchlist</button>\n    </div>\n    <section class = 'similar-media'></section>\n    ");
   return mediaHTML;
 }; // get similar media data
 
@@ -1445,7 +1446,10 @@ var insertSimilar = function insertSimilar(data) {
           searchData(_title2);
         }
       }
-    });
+    }); // insert the back btn
+
+    var btn = "".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>');
+    document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
   }, 1000);
 }; // get genre of media
 
@@ -1589,11 +1593,7 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('click', function (e) {
   if (!e.target.classList.contains('delErr')) return; // restore original state
 
-  title.style.opacity = 1;
-  title.style.display = 'flex';
-  paginationCont.style.opacity = 1;
-  paginationCont.style.display = 'flex';
-  ajax('_', page);
+  (0, _config.restoreState)(title, paginationCont, page, ajax);
   container.classList.remove('overlay'); // remove error
 
   var errContainer = document.querySelector('.error-container');

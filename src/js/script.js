@@ -2,6 +2,8 @@ import { async } from 'regenerator-runtime';
 import 'regenerator-runtime/runtime';
 import { key } from "./config";
 import { renderError } from './config';
+import { clearSection } from './config';
+import { restoreState } from './config';
 
 // get elements
 const container = document.querySelector('.container')
@@ -104,16 +106,11 @@ container.addEventListener('click', function (e) {
     if (e.target === backBtn) {
         // clear details and similar media section
         backBtn.remove();
-        document.querySelector('.closer-look').innerHTML = '';
-        document.querySelector('.closer-look').style.display = 'none'
+        document.querySelector('.closer-look').remove();
 
 
         // restore original state
-        title.style.opacity = 1;
-        title.style.display = 'flex'
-        paginationCont.style.opacity = 1;
-        paginationCont.style.display = 'flex'
-        ajax('_', page)
+        restoreState(title, paginationCont, page, ajax)
 
         // clear similar media
         const similar = document.querySelector('.similar-media');
@@ -252,12 +249,7 @@ const movieDetailed = async function (d) {
     const genres = await getGenre(d);
 
     // clear the section and insert details of movie
-    popularMoviesSection.innerHTML = '';
-    title.style.opacity = 0;
-    title.style.display = 'none'
-    paginationCont.style.opacity = 0;
-    // paginationCont.style.height = 0;
-    paginationCont.style.display = 'none'
+    clearSection(popularMoviesSection, title, paginationCont);
 
     // render the detailed html
     const html = renderDetails(d, link, genres, local)
@@ -293,11 +285,7 @@ const tvDetailed = async function (d) {
 
 
         // clear the section and insert details of movie
-        popularMoviesSection.innerHTML = '';
-        title.style.opacity = 0;
-        title.style.display = 'none'
-        paginationCont.style.opacity = 0;
-        paginationCont.style.display = 'none'
+        clearSection(popularMoviesSection, title, paginationCont);
 
         const html = renderDetails(d, link, genres, local)
 
@@ -313,11 +301,7 @@ const tvDetailed = async function (d) {
     const genres = await getGenre(d);
 
     // clear the section and insert details of movie
-    popularMoviesSection.innerHTML = '';
-    title.style.opacity = 0;
-    title.style.display = 'none'
-    paginationCont.style.opacity = 0;
-    paginationCont.style.display = 'none'
+    clearSection(popularMoviesSection, title, paginationCont);
 
     const html = renderDetails(d, '_', genres, local)
 
@@ -330,7 +314,6 @@ const tvDetailed = async function (d) {
 
 const personDetailed = async function (data) {
     const html = `
-    ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
     <div class = 'closer-look'>
     <h2>${data.name}</h2>
     <div class="mini-details">
@@ -365,6 +348,7 @@ const personDetailed = async function (data) {
         })
         // look at known for movies
         container.addEventListener('click', function (e) {
+
             // conditions
             if (e.target.classList.contains('known-for') || e.target.parentElement === null) return;
             if (typeof knownForMovies === 'undefined') return;
@@ -378,16 +362,18 @@ const personDetailed = async function (data) {
                 }
             }
         })
+        // insert back btn
+        const btn = `${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}`;
+
+        document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
     }, 1000)
     // clear the section and insert details of movie
-    popularMoviesSection.innerHTML = '';
-    title.style.opacity = 0;
-    title.style.display = 'none'
-    paginationCont.style.opacity = 0;
-    paginationCont.style.display = 'none'
+    clearSection(popularMoviesSection, title, paginationCont);
 
     return html
 }
+
+
 
 
 // create detailed HTML for media
@@ -404,8 +390,6 @@ const renderDetails = function (d, trailer, genres, local) {
 
 
     const mediaHTML = `
-    ${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}
-    
     <div class='closer-look'>
     <h2>${d.title || d.name}</h2>
     <div class="mini-details">
@@ -472,6 +456,9 @@ const insertSimilar = function (data) {
                 }
             }
         })
+        // insert the back btn
+        const btn = `${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}`;
+        document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
     }, 1000)
 }
 
@@ -543,11 +530,7 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('click', function (e) {
     if (!e.target.classList.contains('delErr')) return;
     // restore original state
-    title.style.opacity = 1;
-    title.style.display = 'flex';
-    paginationCont.style.opacity = 1;
-    paginationCont.style.display = 'flex'
-    ajax('_', page)
+    restoreState(title, paginationCont, page, ajax)
     container.classList.remove('overlay')
 
     // remove error

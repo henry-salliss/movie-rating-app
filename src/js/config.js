@@ -16,3 +16,19 @@ export const renderError = function (msg, cont) {
     cont.classList.add('overlay');
     cont.insertAdjacentHTML('beforebegin', html);
 };
+
+export const clearSection = function (section, title, pag) {
+    section.innerHTML = '';
+    title.style.opacity = 0;
+    title.style.display = 'none'
+    pag.style.opacity = 0;
+    pag.style.display = 'none'
+}
+
+export const restoreState = function (title, pagCont, pg, func) {
+    title.style.opacity = 1;
+    title.style.display = 'flex'
+    pagCont.style.opacity = 1;
+    pagCont.style.display = 'flex'
+    func('_', pg)
+}
