@@ -206,6 +206,7 @@ const watchlistMessage = function (msg, location) {
 // show watchlist on click
 watchlistBtn.addEventListener('click', function (e) {
     e.preventDefault();
+
     if (!watchlistSection.classList.contains('reveal')) {
         watchlistSection.classList.add('reveal');
         // show box section of all names of saved shows
@@ -214,11 +215,15 @@ watchlistBtn.addEventListener('click', function (e) {
             const html = `<p class="item">${item}</p>`
             watchlistSection.insertAdjacentHTML('afterbegin', html);
         })
+        const placeholder = document.querySelector('#placeholder')
+        if (placeholder === null) return;
+        placeholder.remove();
 
     } else if (watchlistSection.classList.contains('reveal')) {
         watchlistSection.classList.remove('reveal')
         watchlistSection.innerHTML = '';
     }
+    if (watchlistSection.textContent === '') watchlistSection.insertAdjacentHTML('afterbegin', `<p id = 'placeholder'>No shows or movies saved to watchlist yet!</p>`);
 })
 
 watchlistSection.addEventListener('click', function (e) {
@@ -418,6 +423,12 @@ const getSimilar = async function (data) {
 
 // similar shows and movies html
 const insertSimilar = function (data) {
+    // insert backbtn even if there is no similar media
+    setTimeout(() => {
+        const btn = `${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}`;
+        document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
+    }, 1000)
+
     if (data.success === false || data.results.length === 0) return;
     // wait 1 second so similar media section is not null
     setTimeout(() => {
@@ -456,9 +467,6 @@ const insertSimilar = function (data) {
                 }
             }
         })
-        // insert the back btn
-        const btn = `${typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>'}`;
-        document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
     }, 1000)
 }
 

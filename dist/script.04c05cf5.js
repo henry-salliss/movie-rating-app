@@ -1169,10 +1169,15 @@ watchlistBtn.addEventListener('click', function (e) {
       var html = "<p class=\"item\">".concat(item, "</p>");
       watchlistSection.insertAdjacentHTML('afterbegin', html);
     });
+    var placeholder = document.querySelector('#placeholder');
+    if (placeholder === null) return;
+    placeholder.remove();
   } else if (watchlistSection.classList.contains('reveal')) {
     watchlistSection.classList.remove('reveal');
     watchlistSection.innerHTML = '';
   }
+
+  if (watchlistSection.textContent === '') watchlistSection.insertAdjacentHTML('afterbegin', "<p id = 'placeholder'>No shows or movies saved to watchlist yet!</p>");
 });
 watchlistSection.addEventListener('click', function (e) {
   if (!e.target.classList.contains('item')) return;
@@ -1418,6 +1423,11 @@ var getSimilar = /*#__PURE__*/function () {
 
 
 var insertSimilar = function insertSimilar(data) {
+  // insert backbtn even if there is no similar media
+  setTimeout(function () {
+    var btn = "".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>');
+    document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
+  }, 1000);
   if (data.success === false || data.results.length === 0) return; // wait 1 second so similar media section is not null
 
   setTimeout(function () {
@@ -1446,10 +1456,7 @@ var insertSimilar = function insertSimilar(data) {
           searchData(_title2);
         }
       }
-    }); // insert the back btn
-
-    var btn = "".concat(typeof backBtn != 'undefined' ? '' : '<button ><i class="fas fa-home" id="backBtn"></i></button>');
-    document.querySelector('.closer-look').insertAdjacentHTML('beforebegin', btn);
+    });
   }, 1000);
 }; // get genre of media
 
@@ -1627,7 +1634,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49733" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57549" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
